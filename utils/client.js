@@ -1,5 +1,9 @@
 import { Client, Collection, Intents } from "discord.js";
 import { read } from "../utils/read.js";
+const options = {
+  intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
+};
+
 class Lucy {
   client = new Client(options);
   eventFiles = read("./events");
