@@ -20,7 +20,18 @@ class Lucy {
       data.toJSON()
     );
   }
-}
 
+  async setEvents() {
+    for (const file of this.eventFiles) {
+      const { event } = await import(`../events/${file}`);
+      if (event.once) {
+        this.client.once(event.name, (...args) => event.execute(...args));
+      } else {
+        this.client.on(event.name, (...args) => event.execute(...args));
+      }
+    }
+          }
+
+}
 
 export const lucy = new Lucy();
