@@ -2,6 +2,8 @@ import { Client, Collection, Intents } from "discord.js";
 import { read } from "../utils/read.js";
 class Lucy {
   client = new Client(options);
+  eventFiles = read("./events");
+  commandFiles = read("./commands");
   constructor() {
     this.client.commands = new Collection();
   }
