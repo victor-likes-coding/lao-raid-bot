@@ -30,6 +30,16 @@ class Lucy {
         this.client.on(event.name, (...args) => event.execute(...args));
       }
     }
+  }
+
+  async setCommands() {
+    for (const file of this.commandFiles) {
+      const { command } = await import(`../commands/${file}`);
+      // set a new item in the Collection
+      // with the key as the command name and the value as the exported module
+      this.client.commands.set(command.data.name, command);
+    }
+  }
           }
 
 }
