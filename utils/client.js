@@ -1,4 +1,5 @@
 import { Client, Collection, Intents } from "discord.js";
+import { read } from "../utils/read.js";
 class Lucy {
   client = new Client(options);
   constructor() {
