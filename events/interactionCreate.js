@@ -10,9 +10,12 @@ export const event = {
         .get(interaction.commandName)
         .execute(interaction);
     } catch (error) {
-      console.error(error);
+      const message = new ErrorMessage({
+        title: "Error",
+        description: "There was an error while executing this command!",
+      });
       await interaction.reply({
-        content: "There was an error while executing this command!",
+        embeds: message.content,
         ephemeral: true,
       });
     }
