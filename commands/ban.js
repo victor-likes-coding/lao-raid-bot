@@ -1,4 +1,8 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
+import { ErrorMessage } from "../src/model/Message/ErrorMessage.js";
+import { errors } from "../src/errors/codes.js";
+import { Interaction } from "discord.js";
+import { LucyEmbed } from "../src/model/Message/LucyEmbed.js";
 
 const description = "Bans the user (not bots) from the server";
 
@@ -8,46 +12,67 @@ export const command = {
     .setDescription(description)
     .addUserOption((option) =>
       option.setName("user").setDescription(description).setRequired(true)
+    )
+    .addStringOption((option) =>
+      option
+        .setName("reason")
+        .setDescription("Reason for banning user")
+        .setRequired(true)
     ),
-  async execute(interaction) {
+  async execute(interaction = new Interaction()) {
     // check user permissions
-    if (!interaction.member.permissions.has("BAN_MEMBERS"))
-      return interaction.reply(
-        "You do not possess the capability to ban members, please reach out to the owner for access"
-      );
-
+    const { id: userId } = interaction.member;
     const { user: target } = interaction.options.data[0];
-    // if they do have permission, check and see if the user is a bot -- only owner can remove bots
-    if (target.bot) {
-      // bans are for members not bots
-      return interaction.reply(
-        "The command you are attempting to use is intended towards human members and not bots"
-      );
-    }
+    const { ownerId } = interaction.guild;
 
-    // members with ban powers cannot ban each other
-    const targetCanBan =
-      interaction.options.data[0].member.permissions.has("BAN_MEMBERS");
-    if (targetCanBan) {
-      // unless you're the owner
-      const { ownerId } = interaction.guild;
-      const { id: userId } = interaction.member;
+    const error = new ErrorMessage({
+      title: "Ban Error",
+    });
 
-      if (ownerId === userId) {
-        // unless you're trying to ban yourself...?
-        if (target.id === ownerId) {
-          return interaction.reply(
-            "You are attempting to ban yourself. Why? Aborting..."
-          );
-        }
-        return interaction.reply("You're the boss, commencing ban");
+    try {
+      // Error message may throw an error
+      // member initiating ban must have permissions
+      if (!interaction.member.permissions.has("BAN_MEMBERS")) {
+        error.setErrorReason("bans", "NO_BAN_PERMS");
+        return interaction.reply({ embeds: [error.content] });
       }
 
-      return interaction.reply(
-        "Can't ban members who can ban others, it's usurping power."
-      );
+      // member cannot ban themself
+      console.log(userId, ownerId);
+      if (target.id === ownerId) {
+        error.setErrorReason("bans", "NO_SELF_BAN");
+        return interaction.reply({ embeds: [error.content] });
+      }
+
+      // member cannot ban bots
+      if (target.bot) {
+        error.setErrorReason("bans", "NO_BAN_BOTS");
+        return interaction.reply({ embeds: [error.content] });
+      }
+
+      const targetCanBan =
+        interaction.options.data[0].member.permissions.has("BAN_MEMBERS");
+      // member cannot ban other members with ban permission
+      if (targetCanBan) {
+        // member is not owner -- cannot ban others with ban powers
+        if (ownerId !== userId) {
+          error.setErrorReason("bans", "NO_MOD_BANS");
+          return interaction.reply({ embeds: [error.content] });
+        }
+      }
+
+      const message = new LucyEmbed({
+        title: "Ban Hammer Time",
+        description: `Banning ${target.member.user.username}`,
+        color: "#00ff00",
+      });
+
+      // target.member.ban();
+      return interaction.reply({ embeds: message.content });
+    } catch (error) {
+      console.log(error.message);
+      console.log(error);
+      // const code = message.match(/\d{5}/);
     }
-    console.log(interaction.options);
-    return interaction.reply("Work in progress... Please try again");
   },
 };
