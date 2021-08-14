@@ -1,3 +1,5 @@
+import { ErrorMessage } from "../src/model/Message/ErrorMessage.js";
+
 export const event = {
   name: "interactionCreate",
   async execute(interaction) {
@@ -6,7 +8,7 @@ export const event = {
     if (!interaction.client.commands.has(interaction.commandName)) return;
 
     try {
-      await interaction.client.commands
+      return interaction.client.commands
         .get(interaction.commandName)
         .execute(interaction);
     } catch (error) {
@@ -15,7 +17,7 @@ export const event = {
         description: "There was an error while executing this command!",
       });
       await interaction.reply({
-        embeds: message.content,
+        embeds: [message.content],
         ephemeral: true,
       });
     }
