@@ -7,6 +7,8 @@ export const event = {
     if (!message.content.startsWith(prefix) || message.member.user.bot) {
       return;
     }
-    console.log(message.content);
+    message.reply(
+      "prefix commands are under construction, please use / commands"
+    );
   },
 };
