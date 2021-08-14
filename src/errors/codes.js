@@ -46,5 +46,9 @@ export const errors = {
       text: "Missing required params in setting error up.",
       code: 30000,
     },
+    NAN: {
+      text: "Required parm should be a floatable string (i.e. .5 or 1.25 etc)",
+      code: 30001,
+    },
   },
 };
