@@ -1,6 +1,6 @@
 import { MessageEmbed } from "discord.js";
 
-export class Message {
+export class LucyEmbed {
   constructor(
     options = {
       color: "blue",
