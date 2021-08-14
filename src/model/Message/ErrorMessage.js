@@ -1,7 +1,6 @@
-import { Message } from "./Message.js";
+import { LucyEmbed } from "./LucyEmbed.js";
 
-export class ErrorMessage extends Message {
-  constructor(options = {}) {
+export class ErrorMessage extends LucyEmbed {
     super(options);
     this.content.setColor("red");
   }
