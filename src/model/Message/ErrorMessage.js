@@ -12,7 +12,7 @@ export class ErrorMessage extends LucyEmbed {
     }
   }
 
-  setErrorReason(category, reason) {
+  setErrorReason(category = "", reason = "") {
     this.reason = reason;
     this.category = category;
     this.__setError();
@@ -29,7 +29,6 @@ export class ErrorMessage extends LucyEmbed {
   }
 
   getErrorReason() {
-    console.log(this.category, this.reason);
     if (this.category && this.reason) {
       const error = errors[this.category][this.reason];
       return error;
