@@ -1,13 +1,12 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { MessageEmbed } from "discord.js";
-import { Message } from "../src/model/Message/Message.js";
+import { LucyEmbed } from "../src/model/Message/LucyEmbed.js";
 
 export const command = {
   data: new SlashCommandBuilder()
     .setName("commands")
     .setDescription("Provides an up to date list of commands from Lucy"),
   async execute(interaction) {
-    const message = new Message().addTitle("Lucy's Slash Command");
+    const message = new LucyEmbed().addTitle("Lucy's Slash Command");
     const commands = interaction.client.commands;
     for (const [title, _] of commands) {
       const { description } = _.data.toJSON();
