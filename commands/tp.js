@@ -14,7 +14,7 @@ export const command = {
       option.setName("id").setDescription("Trade id -- reference the dashboard it'll be in the format -> #. aka 1. or 13.").setRequired(true)
     )
     .addStringOption((option) => option.setName("price").setDescription("Price sold contracts at").setRequired(true))
-    .addStringOption((option) => option.setName("amount").setDescription("Amount of contracts sold, default is 1"))
+    .addIntegerOption((option) => option.setName("amount").setDescription("Amount of contracts sold, default is 1"))
     .addStringOption((option) => option.setName("sl").setDescription("A stop loss for members, optional")),
   async execute(interaction = new Interaction()) {
     // get the user id of member that issued tp command
@@ -39,11 +39,14 @@ export const command = {
       // order is closed
       data[userId][idObj.value - 1] = trade.info;
       data[userId] = getTrades(userId).filter((td) => td.status);
-      tradeMessage.content.setColor("RED").setTitle(trade.toString()).setDescription(trade.toProfitPercentString());
+      tradeMessage.content
+        .setColor("RED")
+        .setTitle(trade.toString())
+        .setDescription(trade.toProfitPercentString())
+        .addField("Summary", `Total Profit: ${trade.profitPercent}`);
     } else {
       tradeMessage.content.setTitle(trade.toString()).setDescription(trade.toProfitPercentString());
     }
-    console.log(getTrades(userId));
 
     if (getTrades(userId).length) {
       getTrades(userId).forEach((td, index) => {
