@@ -172,7 +172,11 @@ export class Trade {
     return `Current Profit: ${this.__profitPercent}`;
   }
 
-  buy(price, amount) {
+  toAverageString(price) {
+    return `Average ${price > this.average ? "Up" : price < this.average ? "Down" : ""} @ ${format(Number.parseFloat(price))}, new average = ${this.average}`;
+  }
+
+  buy(price, amount = 1) {
     const newCost = price * amount;
     this.__cost += newCost;
     this.__amount += amount;
