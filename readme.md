@@ -14,7 +14,7 @@
 * `add_role <roleName> <user>[]`: adds a role to user(s) ❌
 * `buy/sell <strike> <optionType> <date> <price> [amount=1]`: opens a `trade` object with details of the trade based on 1 contract, unless `amount` specified ✅
 * `tp <tradeId> <price> [amount=1] [sl]`: issues a take profit of `price`, calculates the percentage in profit as well from average price ✅
-* `avg <tradeId> <price> [amount=1] [averagePrice] `: issues an average up/down, displays average based on buying 1 contract (unless `amount` specified or `averagePrice` was given, then uses that instead) ❌
+* `avg <tradeId> <price> [amount=1] [averagePrice] `: issues an average up/down, displays average based on buying 1 contract (unless `amount` specified or `averagePrice` was given, then uses that instead) ✅ 
 * `close <tradeId> <price>`: closes trade by `price`, calculates percentage based on average price. ❌
 * `trim? <averagePrice> <amount=4>`: advises a good tp strategy
 
@@ -63,12 +63,12 @@
   * calculates new average by assuming 1 contract or `amount` @ `price` ✅
   * will instead specify `averagePrice` given by the user ❌
 * on `close` command: 
-  * closes the remaining amount of contracts * `price`
-  * take trade off dashboard
-  * ❌ for loser or ✅ for winner
+  * closes the remaining amount of contracts * `price` ❌ 
+  * take trade off dashboard ❌ 
+  * ❌ for loser or ✅ for winner ❌ 
 * on `trim?` command: 
-  * advise user on taking profits at 5%, 10%, 15%+
-  * advise user to close 25%, 50%, and 25% respectively
-  * advise user to raise stop loss to BE (breakeven), 5%, 10% respectively
-  * shows profit targets based on `averagePrice` entered
-  * shows contracts to close with `4` (default) contracts or `amount` given
+  * advise user on taking profits at 5%, 10%, 15%+ ❌ 
+  * advise user to close 25%, 50%, and 25% respectively ❌ 
+  * advise user to raise stop loss to BE (breakeven), 5%, 10% respectively ❌ 
+  * shows profit targets based on `averagePrice` entered ❌ 
+  * shows contracts to close with `4` (default) contracts or `amount` given ❌ 
