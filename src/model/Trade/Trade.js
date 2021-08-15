@@ -1,6 +1,6 @@
 import moment from "moment";
 import { errors } from "../../errors/codes.js";
-import { round, toPercent } from "../../../utils/utils.js";
+import { round, toPercent, format } from "../../../utils/utils.js";
 
 import { v4 } from "uuid";
 
@@ -144,7 +144,7 @@ export class Trade {
       strike: this.__strike,
       type: this.__type,
       amount: this.__amount,
-      average: this.format(this.__average),
+      average: format(this.__average),
       owner: this.__owner,
       sl: this.__sl,
       profit: this.__profit,
@@ -165,7 +165,11 @@ export class Trade {
   }
 
   toProfitPercentString() {
-    return `Trim ${this.__trim} TP @ ${this.__tp} for ${this.percentify((this.__tp - this.__average) / this.__average)}`;
+    return `Trim ${this.__trim} @ ${this.__tp} for ${toPercent((this.__tp - this.__average) / this.__average)}`;
+  }
+
+  toTotalProfitPercent() {
+    return `Current Profit: ${this.__profitPercent}`;
   }
 
   buy(price, amount) {
@@ -176,7 +180,7 @@ export class Trade {
   }
 
   toString() {
-    return `${this.__status ? "OPEN" : "CLOSED"} $${this.__ticker} ${this.__date} ${this.__strike}${this.__type} @ ${this.format(this.__average)} ${
+    return `${this.__status ? "OPEN" : "CLOSED"} $${this.__ticker} ${this.__date} ${this.__strike}${this.__type} @ ${format(this.__average)} ${
       this.__sl ? `\nStop: ${this.__sl}` : ""
     }`;
   }
