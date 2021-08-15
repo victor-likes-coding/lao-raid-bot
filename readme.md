@@ -60,7 +60,7 @@
   * shows percent of profit target vs average price (20%/40%/60%, etc) of profit target ✅
   * updates dashboard to show current profit % for trade ✅
 * on `avg` command: 
-  * calculates new average by assuming 1 contract or `amount` @ `price` ❌
+  * calculates new average by assuming 1 contract or `amount` @ `price` ✅
   * will instead specify `averagePrice` given by the user ❌
 * on `close` command: 
   * closes the remaining amount of contracts * `price`
