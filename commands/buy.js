@@ -56,7 +56,7 @@ export const command = {
 
       memberTradeData.forEach((memberTrade, index) => {
         const currentTrade = new Trade(memberTrade);
-        dashboard.addField({ title: `${index + 1}. ${currentTrade.toString()}`, description: currentTrade.profit });
+        dashboard.addField({ title: `${index + 1}. ${currentTrade.toString()}`, description: currentTrade.toTotalProfitPercent() });
       });
 
       // TODO: display dashboard in respective channel if member is an analyst (should be the only message in the channel so that it can be replaced)
