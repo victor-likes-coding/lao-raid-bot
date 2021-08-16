@@ -7,6 +7,7 @@ import { v4 } from "uuid";
 export class Trade {
   constructor({
     id,
+    date = moment().day(5).format("MM/DD"),
     ticker,
     strike,
     type = "c",
