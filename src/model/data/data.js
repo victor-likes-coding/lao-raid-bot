@@ -19,7 +19,6 @@ class DB {
 
   getTradesByUserId(id, index = undefined) {
     const trades = this.trades.filter((trade) => trade.owner === id);
-    console.log(trades);
     return (index && index > 0 ? trades[index - 1] : trades) || [];
   }
 
