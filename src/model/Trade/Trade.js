@@ -191,6 +191,9 @@ export class Trade {
   }
 
   takeProfit(price, amount = 1) {
+    if (amount > this.__amount) {
+      amount = this.__amount;
+    }
     this.__profit = round((price - this.__average) * amount);
     this.__trim = toPercent(amount / this.__amount, 0);
     this.__amount -= amount;
