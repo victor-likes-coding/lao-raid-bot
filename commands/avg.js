@@ -5,6 +5,7 @@ import { Interaction } from "discord.js";
 import { LucyEmbed } from "../src/model/Message/LucyEmbed.js";
 import { Trade } from "../src/model/Trade/Trade.js";
 import { db } from "../src/model/data/data.js";
+import { checkForOptionalValue } from "../utils/utils.js";
 
 export const command = {
   data: new SlashCommandBuilder()
@@ -14,12 +15,11 @@ export const command = {
       option.setName("id").setDescription("Trade id -- reference the dashboard it'll be in the format -> #. aka 1. or 13.").setRequired(true)
     )
     .addStringOption((option) => option.setName("price").setDescription("Price sold contracts at").setRequired(true))
-    .addIntegerOption((option) => option.setName("amount").setDescription("Amount of contracts sold, default is 1"))
-    .addStringOption((option) => option.setName("average").setDescription("optional arg, if you know the average price ahead of time")),
+    .addIntegerOption((option) => option.setName("amount").setDescription("Amount of contracts sold, default is 1")),
   async execute(interaction = new Interaction()) {
     // get the user id of member that issued tp command
     const { id: userId } = interaction.member.user;
-    const [idObj, priceObj, amountObj, avgObj] = interaction.options.data;
+    const [idObj, priceObj, optionalData] = interaction.options.data;
     const tradeMessage = new LucyEmbed({ color: "#00a6d9" });
     const dashboardMessage = new LucyEmbed({ color: "#00a6d9" });
     dashboardMessage.content.setAuthor(`${interaction.member.user.username}'s current open trades`);
@@ -32,7 +32,8 @@ export const command = {
     const trade = new Trade(tradeData);
 
     // act on Trade data -- average
-    amountObj?.value && amountObj.value > 1 ? trade.buy(priceObj.value, amountObj.value) : trade.buy(priceObj.value);
+    const amount = checkForOptionalValue(optionalData, "amount");
+    amount > 1 ? trade.buy(priceObj.value, amount) : trade.buy(priceObj.value);
 
     // update db
     db.updateById(userId, idObj.value, trade.info);

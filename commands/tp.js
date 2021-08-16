@@ -5,6 +5,7 @@ import { Interaction } from "discord.js";
 import { LucyEmbed } from "../src/model/Message/LucyEmbed.js";
 import { Trade } from "../src/model/Trade/Trade.js";
 import { db } from "../src/model/data/data.js";
+import { checkForOptionalValue } from "../utils/utils.js";
 
 export const command = {
   data: new SlashCommandBuilder()
@@ -19,7 +20,7 @@ export const command = {
   async execute(interaction = new Interaction()) {
     // get the user id of member that issued tp command
     const { id: userId } = interaction.member.user;
-    const [idObj, priceObj, amountObj, slObj] = interaction.options.data;
+    const [idObj, priceObj, optionalData] = interaction.options.data;
     const tradeMessage = new LucyEmbed({ color: "#00a6d9" });
     const dashboardMessage = new LucyEmbed({ color: "#00a6d9" });
     dashboardMessage.content.setAuthor(`${interaction.member.user.username}'s current open trades`);
@@ -30,7 +31,8 @@ export const command = {
     const tradeData = db.getTradesByUserId(userId, idObj.value);
     const trade = new Trade(tradeData);
 
-    amountObj?.value && amountObj.value > 1 ? trade.takeProfit(priceObj.value, amountObj.value) : trade.takeProfit(priceObj.value);
+    const amount = checkForOptionalValue(optionalData, "amount");
+    amount > 1 ? trade.takeProfit(priceObj.value, amount) : trade.takeProfit(priceObj.value);
 
     // update database
     db.updateById(userId, idObj.value, trade.info);
