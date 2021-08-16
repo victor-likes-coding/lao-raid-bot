@@ -2,9 +2,9 @@ import moment from "moment";
 import { Trade } from "./Trade.js";
 describe("Trade", () => {
   const data = {
-    price: 1,
+    price: "1",
     amount: 5,
-    strike: 150,
+    strike: "150",
     ticker: "aapl",
   };
 
@@ -42,7 +42,7 @@ describe("Trade", () => {
 
   describe("Should have the following props when taking profit", () => {
     const trade = new Trade(data);
-    trade.takeProfit(1.2, 3);
+    trade.takeProfit("1.2", 3);
     it("Should have profit at .60", () => {
       expect(trade.__profit).toEqual(0.6);
     });
@@ -61,7 +61,7 @@ describe("Trade", () => {
 
   describe("Should have the following props when averaging", () => {
     const trade = new Trade(data);
-    trade.buy(0.5, 5);
+    trade.buy("0.5", 5);
     it("Should have cost of 5 + 2.5 => 7.5", () => {
       expect(trade.cost).toEqual(7.5);
     });
