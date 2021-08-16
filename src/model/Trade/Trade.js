@@ -6,7 +6,7 @@ import { v4 } from "uuid";
 
 export class Trade {
   constructor({
-    date = moment().day(12).format("MM/DD"),
+    id,
     ticker,
     strike,
     type = "c",
@@ -27,7 +27,7 @@ export class Trade {
     } catch (err) {
       throw Error("internal#NAN");
     }
-    this.__id = v4();
+    this.__id = id || v4();
     this.__date = date;
     this.__type = type.toUpperCase();
     this.__owner = owner;
