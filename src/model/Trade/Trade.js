@@ -34,7 +34,7 @@ export class Trade {
     this.__owner = owner;
     this.__sl = undefined;
     this.__profit = profit;
-    this.__status = status; // > 0 means open
+    this.__status = status; // true means open
     this.__cost = cost || this.__average * this.__amount;
     this.__tp = undefined;
     this.__trim = "";
