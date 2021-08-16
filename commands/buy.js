@@ -4,7 +4,7 @@ import { errors } from "../src/errors/codes.js";
 import { Interaction } from "discord.js";
 import { LucyEmbed } from "../src/model/Message/LucyEmbed.js";
 import { Trade } from "../src/model/Trade/Trade.js";
-import { data } from "../src/model/data/data.js";
+import { db } from "../src/model/data/data.js";
 
 const description = "BTO (Buy to Open) a trade object with details of the trade based on 1 contract";
 
@@ -35,10 +35,6 @@ export const command = {
         info: { type, date, average, strike, ticker, id, owner },
       } = trade;
 
-      if (!data[owner]) {
-        data[owner] = [];
-      }
-
       // if the trade type is a P(ut), change embed color to red, default is green for calls
       if (type === "P") {
         //
@@ -48,13 +44,13 @@ export const command = {
       message.addDescription(`BTO ${ticker} ${date} ${strike}${type} @ ${average}`);
 
       // TODO: add trade to a list to be ref'd later (AKA `list` will be a db)
-      data[owner] = [...data[owner], trade.info]; // this will later be a database
+      db.add([trade.info]); // this will later be a database
 
       // TODO: display dashboard in some channel for now
       dashboard.content.setAuthor(`${interaction.member.user.username}'s current open trades`);
-      const memberTradeData = data[owner];
+      const tradesByUser = db.getOpenOrdersByUserId(owner);
 
-      memberTradeData.forEach((memberTrade, index) => {
+      tradesByUser.forEach((memberTrade, index) => {
         const currentTrade = new Trade(memberTrade);
         dashboard.addField({ title: `${index + 1}. ${currentTrade.toString()}`, description: currentTrade.toTotalProfitPercent() });
       });

@@ -4,7 +4,7 @@ import { errors } from "../src/errors/codes.js";
 import { Interaction } from "discord.js";
 import { LucyEmbed } from "../src/model/Message/LucyEmbed.js";
 import { Trade } from "../src/model/Trade/Trade.js";
-import { data, getTrades } from "../src/model/data/data.js";
+import { db } from "../src/model/data/data.js";
 
 export const command = {
   data: new SlashCommandBuilder()
@@ -27,7 +27,7 @@ export const command = {
     // TODO: figure out if member has analyst role
 
     // get the trade data and turn it into a Trade
-    const tradeData = getTrades(userId)[idObj.value - 1];
+    const tradeData = db.getTradesByUserId(userId, idObj.value);
 
     const trade = new Trade(tradeData);
 
@@ -35,15 +35,14 @@ export const command = {
     amountObj?.value && amountObj.value > 1 ? trade.buy(priceObj.value, amountObj.value) : trade.buy(priceObj.value);
 
     // update db
-    data[userId][idObj.value - 1] = trade.info;
+    db.updateById(userId, idObj.value, trade.info);
 
     // update messages
     tradeMessage.content.setTitle(trade.toString()).setDescription(trade.toAverageString(priceObj.value));
-    getTrades(userId).forEach((td, index) => {
+    db.getOpenOrdersByUserId(userId).forEach((td, index) => {
       const currentTrade = new Trade(td);
       dashboardMessage.addField({ title: `${index + 1}. ${currentTrade.toString()}`, description: currentTrade.toTotalProfitPercent() });
     });
-
     return interaction.reply({ embeds: [tradeMessage.content, dashboardMessage.content] });
   },
 };

@@ -4,7 +4,7 @@ import { errors } from "../src/errors/codes.js";
 import { Interaction } from "discord.js";
 import { LucyEmbed } from "../src/model/Message/LucyEmbed.js";
 import { Trade } from "../src/model/Trade/Trade.js";
-import { data, getTrades } from "../src/model/data/data.js";
+import { db } from "../src/model/data/data.js";
 
 export const command = {
   data: new SlashCommandBuilder()
@@ -27,18 +27,16 @@ export const command = {
     // TODO: figure out if member has analyst role
 
     // get the trade data and turn it into a Trade
-    const tradeData = getTrades(userId)[idObj.value - 1];
-
+    const tradeData = db.getTradesByUserId(userId, idObj.value);
     const trade = new Trade(tradeData);
+
     amountObj?.value && amountObj.value > 1 ? trade.takeProfit(priceObj.value, amountObj.value) : trade.takeProfit(priceObj.value);
 
     // update database
-    data[userId][idObj.value - 1] = trade.info;
+    db.updateById(userId, idObj.value, trade.info);
 
     if (!trade.status) {
       // order is closed
-      data[userId][idObj.value - 1] = trade.info;
-      data[userId] = getTrades(userId).filter((td) => td.status);
       tradeMessage.content
         .setColor("RED")
         .setTitle(trade.toString())
@@ -48,8 +46,8 @@ export const command = {
       tradeMessage.content.setTitle(trade.toString()).setDescription(trade.toProfitPercentString());
     }
 
-    if (getTrades(userId).length) {
-      getTrades(userId).forEach((td, index) => {
+    if (db.getOpenOrdersByUserId(userId).length) {
+      db.getOpenOrdersByUserId(userId).forEach((td, index) => {
         const currentTrade = new Trade(td);
         dashboardMessage.addField({ title: `${index + 1}. ${currentTrade.toString()}`, description: currentTrade.toTotalProfitPercent() });
       });
