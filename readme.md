@@ -8,15 +8,15 @@
 * `play`: play song in current queue ❌
 * `pause`: pauses song playing ❌
 * `play [songName]`: looks up song name and adds it to the queue ❌
-* `lock [channel] [reason] [duration=1d]`: locks a channel from being messaged in unless you're a mod (TODO: define mod) ❌
+* `lock [channel, reason, duration=1d]`: locks a channel from being messaged in unless you're a mod (TODO: define mod) ❌
 * `unlock [channel]` ❌
 * `create_role <roleName>`: allows member to create roles, only owner can create roles with ban/kick permissions ❌
 * `add_role <roleName> <user>[]`: adds a role to user(s) ❌
-* `buy/sell <strike> <optionType> <price> [date] [amount=1]`: opens a `trade` object with details of the trade based on 1 contract, unless `amount` specified ✅
-* `tp <tradeId> <price> [amount=1] [sl]`: issues a take profit of `price`, calculates the percentage in profit as well from average price ✅
+* `buy/sell <strike> <optionType> <price> [date, amount=1]`: opens a `trade` object with details of the trade based on 1 contract, unless `amount` specified ✅
+* `tp <tradeId> <price> [amount=1, sl]`: issues a take profit of `price`, calculates the percentage in profit as well from average price ✅
 * `avg <tradeId> <price> [amount=1]`: issues an average up/down, displays average based on buying 1 contract ✅ 
 * `close <tradeId> <price>`: closes trade by `price`, calculates percentage based on average price. ✅
-* `trim? <averagePrice> <amount=4>`: advises a good tp strategy
+* `trim? [averagePrice, amount=4]`: advises a good tp strategy ❌
 
 ## interactions
 * on `kick` command: member cannot kick another member that is:
@@ -52,7 +52,7 @@
   * should add play as a summary in gen chat or other chats ❌
   * trade should be stored for later reference in database ❌
   * add trade to a dashboard for member listing trades by order `tradeId` ❌
-  * will keep track of open trades if user enters more than 1 amount (via `pt`, `avg`, `close` commands) ❌
+  * will keep track of open trades if user enters more than 1 amount (via `pt`, `avg`, `close` commands) ✅
 * on `tp` command: 
   * if member only has 1 contract amount, will close order on dashboard ✅
   * if member has more than 1 contract, will subtract by 1 or given `amount` ✅
