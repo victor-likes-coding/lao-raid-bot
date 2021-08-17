@@ -13,13 +13,12 @@ export const toPercent = (value, precision = 2) => {
   return `${format(value * 100, precision)}%`;
 };
 
-export const checkForOptionalValue = (optionalData, name) => {
-  if (optionalData.length) {
-    return (
-      optionalData.filter((data) => {
-        data.name === name;
-      })[0].value || undefined
-    );
+export const checkForOptionalValue = (optionalData = {}, name) => {
+  if (optionalData.hasOwnProperty("length") && optionalData.length) {
+    const matching = optionalData.filter((data) => {
+      return data.name === name;
+    });
+    return matching[0]?.value || undefined;
   }
 
   return optionalData?.value || undefined;
