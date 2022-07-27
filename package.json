@@ -1,0 +1,11 @@
+{
+  "name": "lao-raid",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Victor Tran",
+  "license": "MIT",
+  "dependencies": {
+    "@discordjs/rest": "^1.0.1",
+    "discord.js": "^14.0.3"
+  }
+}
