@@ -1,4 +1,4 @@
-import config from "../config.js";
+import { config } from "../config.js";
 import { bot } from "../utils/client.js";
 
 bot.start();
