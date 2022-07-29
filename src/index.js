@@ -1,6 +1,6 @@
 import config from "../config.js";
-import { lucy } from "../utils/client.js";
+import { bot } from "../utils/client.js";
 
-lucy.start();
+bot.start();
 
-lucy.client.login(config.token);
+bot.client.login(config.token);
