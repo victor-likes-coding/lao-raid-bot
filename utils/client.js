@@ -1,18 +1,17 @@
-import { Client, Collection, Intents } from "discord.js";
+import { Client, Collection, GatewayIntentBits, Routes } from "discord.js";
 import { read } from "../utils/read.js";
 import { REST } from "@discordjs/rest";
-import { Routes } from "discord-api-types/v9";
-import config from "../config.js";
+import { config } from "../config.js";
 
 const options = {
-    intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
+    intents: [GatewayIntentBits.Guilds],
 };
 
 class Bot {
     client = new Client(options);
     eventFiles = read("./events");
     commandFiles = read("./commands");
-    rest = new REST({ version: "9" }).setToken(config.token);
+    rest = new REST({ version: "10" }).setToken(config.token);
 
     constructor() {
         this.client.commands = new Collection();
@@ -48,7 +47,7 @@ class Bot {
     async start() {
         await this.setCommands();
         await this.setEvents();
-        await this.updateCommands(config.guild_id);
+        await this.updateCommands(config.guildId);
     }
 
     async updateCommands(guild_id) {
@@ -56,7 +55,7 @@ class Bot {
             try {
                 console.log("Started refreshing application (/) commands.");
 
-                await this.rest.put(Routes.applicationGuildCommands(config.client_id, config.guild_id), {
+                await this.rest.put(Routes.applicationGuildCommands(config.clientId, guild_id), {
                     body: this.commands,
                     headers: { "Content-Type": "application/json" },
                 });
