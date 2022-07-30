@@ -1,4 +1,5 @@
 import { ActionRowBuilder, SelectMenuBuilder } from "discord.js";
+import { db } from "../../utils/client.js";
 
 const times = [];
 
@@ -67,5 +68,26 @@ export class Raid {
     static addUpdaterId = (id) => {
         this.__updaterId = id;
         return this;
+    };
+
+    // DB functions
+    static add = async (raid) => {
+        /**
+         * @raid is an object
+         * {
+         *      date: string
+         *      type: number
+         *      time: string
+         *      characters: [Character]
+         *      active: boolean
+         * }
+         */
+        try {
+            // ! check for those requirements
+            const docRef = await addDoc(collection(db, "raids"), raid);
+            console.log("Document written with ID: ", docRef.id);
+        } catch (e) {
+            console.error("Error adding document: ", e);
+        }
     };
 }
