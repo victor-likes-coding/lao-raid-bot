@@ -5,13 +5,13 @@ export const command = {
     data: new SlashCommandBuilder().setName("host").setDescription("Allows a user to host a raid"),
     async execute(interaction) {
         // create a Raid
-        const raid = new Raid(interaction.user.tag);
+        Raid.addUpdater(interaction.user.tag).addUpdaterId(interaction.user.id);
 
         try {
             // Get Raid Type
             await interaction.reply({
                 content: "Thanks for hosting a raid, please select a raid below:",
-                components: [raid.selectMenus["raid"]],
+                components: [Raid.selectMenus["raid"]],
             });
         } catch (e) {
             await interaction.reply({ content: "Something went wrong" });
