@@ -9,7 +9,7 @@ export const command = {
 
         // create select menu
         const menu = new ActionRowBuilder().addComponents(
-            new SelectMenuBuilder().setCustomId("raid-type").setPlaceholder("Select Raid").addOptions(raid.menus["raid"])
+            new SelectMenuBuilder().setCustomId("raid").setPlaceholder("Select Raid").addOptions(raid.menus["raid"])
         );
 
         try {
