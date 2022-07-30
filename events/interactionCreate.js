@@ -31,6 +31,14 @@ export const event = {
                     components: [raid["selectMenus"]["date"]],
                 });
             }
+
+            if (interaction.customId === "date") {
+                await interaction.editReply({
+                    content: `You've chosen: ${raid.menus["date"][Number.parseInt(interaction.values[0])].label}, now choose a time`,
+                    ephemeral: true,
+                    components: [raid["selectMenus"]["time"]],
+                });
+            }
         }
     },
 };
