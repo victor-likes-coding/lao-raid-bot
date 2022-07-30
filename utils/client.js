@@ -2,7 +2,7 @@ import { Client, Collection, GatewayIntentBits, Routes } from "discord.js";
 import { read } from "../utils/read.js";
 import { REST } from "@discordjs/rest";
 import { config } from "../config.js";
-import { Raid } from "./model/Raid.js";
+import { Raid } from "../src/model/Raid.js";
 
 const options = {
     intents: [GatewayIntentBits.Guilds],
