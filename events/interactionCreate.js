@@ -39,6 +39,16 @@ export const event = {
                     components: [raid["selectMenus"]["time"]],
                 });
             }
+
+            if (interaction.customId === "time") {
+                await interaction.editReply({
+                    content: `You've chosen: ${
+                        raid.menus["time"][Number.parseInt(interaction.values[0])].label
+                    }. Creating object data, will connect database later, this is still in development so nothing is permanent`,
+                    ephemeral: true,
+                    components: [],
+                });
+            }
         }
     },
 };
