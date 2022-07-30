@@ -16,10 +16,6 @@ export class Raid {
     static __date = "";
     static __time = "";
 
-    constructor(tag) {
-        this.host = tag;
-    }
-
     static generateMenu = (list) => {
         return list.reduce((prev, current, index) => {
             return prev.concat({
