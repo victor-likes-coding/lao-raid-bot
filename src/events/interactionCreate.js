@@ -1,4 +1,4 @@
-import { Raid } from "../src/model/Raid.js";
+import { Raid } from "../model/Raid.js";
 
 export const event = {
     name: "interactionCreate",
