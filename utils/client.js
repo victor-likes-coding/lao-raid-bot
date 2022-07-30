@@ -2,6 +2,7 @@ import { Client, Collection, GatewayIntentBits, Routes } from "discord.js";
 import { read } from "../utils/read.js";
 import { REST } from "@discordjs/rest";
 import { config } from "../config.js";
+import { Raid } from "./model/Raid.js";
 
 const options = {
     intents: [GatewayIntentBits.Guilds],
@@ -48,6 +49,7 @@ class Bot {
         await this.setCommands();
         await this.setEvents();
         await this.updateCommands(config.guildId);
+        Raid.setup();
     }
 
     async updateCommands(guild_id) {
