@@ -24,8 +24,13 @@ export const event = {
         // check if selectmenu interaction
         if (interaction.isSelectMenu()) {
             await interaction.deferReply();
-            if (interaction.customId === "raid")
-                await interaction.editReply({ content: `You've chosen: ${raid.menus["raid"][Number.parseInt(interaction.values[0])].label}`, ephemeral: true });
+            if (interaction.customId === "raid") {
+                await interaction.editReply({
+                    content: `You've chosen: ${raid.menus["raid"][Number.parseInt(interaction.values[0])].label}, now choose a date`,
+                    ephemeral: true,
+                    components: [raid["selectMenus"]["date"]],
+                });
+            }
         }
     },
 };
