@@ -25,6 +25,7 @@ export const event = {
         if (interaction.isSelectMenu()) {
             await interaction.deferReply();
             if (interaction.customId === "raid" && interaction.user.id === Raid.getUpdaterId()) {
+                Raid.addRaidDetails(interaction.user.id, "raid", Raid.menus["raid"][Number.parseInt(interaction.values[0])].label);
                 await interaction.editReply({
                     content: `You've chosen: ${Raid.menus["raid"][Number.parseInt(interaction.values[0])].label}, now choose a date`,
                     ephemeral: true,
@@ -33,6 +34,7 @@ export const event = {
             }
 
             if (interaction.customId === "date" && interaction.user.id === Raid.getUpdaterId()) {
+                Raid.addRaidDetails(interaction.user.id, "date", Raid.menus["date"][Number.parseInt(interaction.values[0])].label);
                 await interaction.editReply({
                     content: `You've chosen: ${Raid.menus["date"][Number.parseInt(interaction.values[0])].label}, now choose a time`,
                     ephemeral: true,
@@ -41,6 +43,7 @@ export const event = {
             }
 
             if (interaction.customId === "time" && interaction.user.id === Raid.getUpdaterId()) {
+                Raid.addRaidDetails(interaction.user.id, "time", Raid.menus["time"][Number.parseInt(interaction.values[0])].label);
                 await interaction.editReply({
                     content: `You've chosen: ${
                         Raid.menus["time"][Number.parseInt(interaction.values[0])].label
