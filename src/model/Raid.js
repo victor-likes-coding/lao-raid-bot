@@ -12,9 +12,8 @@ export class Raid {
     static selectMenus = {};
     static __currentUpdater = "";
     static __updaterId = null;
-    static __raid = "";
-    static __date = "";
-    static __time = "";
+
+    static raids = {};
 
     static generateMenu = (list) => {
         return list.reduce((prev, current, index) => {
