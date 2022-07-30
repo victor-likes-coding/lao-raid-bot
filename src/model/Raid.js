@@ -16,6 +16,10 @@ export class Raid {
     static raids = {};
 
     static addRaidDetails = (user, key, value) => {
+        if (!Raid.raids[user]) {
+            Raid.raids[user] = {};
+        }
+
         Raid.raids[user][key] = value;
     };
 
