@@ -15,6 +15,10 @@ export class Raid {
 
     static raids = {};
 
+    static addRaidDetails = (user, key, value) => {
+        Raid.raids[user][key] = value;
+    };
+
     static generateMenu = (list) => {
         return list.reduce((prev, current, index) => {
             return prev.concat({
