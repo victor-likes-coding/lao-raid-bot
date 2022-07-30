@@ -11,11 +11,10 @@ export const command = {
             // Get Raid Type
             await interaction.reply({
                 content: "Thanks for hosting a raid, please select a raid below:",
-                ephemeral: true,
                 components: [raid.selectMenus["raid"]],
             });
         } catch (e) {
-            await interaction.reply({ content: "Something went wrong", ephemeral: true });
+            await interaction.reply({ content: "Something went wrong" });
         }
     },
 };
