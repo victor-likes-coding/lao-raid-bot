@@ -1,3 +1,5 @@
+import { ActionRowBuilder, SelectMenuBuilder } from "discord.js";
+
 const times = [];
 
 for (let i = 0; i < 24; i++) {
@@ -7,6 +9,7 @@ for (let i = 0; i < 24; i++) {
 export class Raid {
     // tag should be a discord tag
     menus = {};
+    selectMenus = {};
 
     constructor(tag) {
         this.host = tag;
@@ -30,6 +33,15 @@ export class Raid {
         this.menus["raid"] = this.generateMenu(["Argos P1", "Argos P2", "Argos P3", "Valtan NM", "Valtan HM", "Vykas NM", "Vykas HM"]);
         this.menus["date"] = this.generateMenu(["Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "Monday", "Tuesday"]);
         this.menus["time"] = this.generateMenu(times);
+
+        // selectmenus
+        this.selectMenus["raid"] = this.createSelectMenus("raid", "Select Raid");
+        this.selectMenus["date"] = this.createSelectMenus("date", "Select Date");
+        this.selectMenus["time"] = this.createSelectMenus("time", "Select Time");
+    };
+
+    createSelectMenus = (type, placeholder) => {
+        return new ActionRowBuilder().addComponents(new SelectMenuBuilder().setCustomId(type).setPlaceholder(placeholder).addOptions(this.menus[type]));
     };
 }
 
