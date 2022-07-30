@@ -1,4 +1,4 @@
-import { raid } from "../src/model/Raid.js";
+import { Raid } from "../src/model/Raid.js";
 
 export const event = {
     name: "interactionCreate",
@@ -24,26 +24,26 @@ export const event = {
         // check if selectmenu interaction
         if (interaction.isSelectMenu()) {
             await interaction.deferReply();
-            if (interaction.customId === "raid") {
+            if (interaction.customId === "raid" && interaction.user.id === Raid.getUpdaterId()) {
                 await interaction.editReply({
-                    content: `You've chosen: ${raid.menus["raid"][Number.parseInt(interaction.values[0])].label}, now choose a date`,
+                    content: `You've chosen: ${Raid.menus["raid"][Number.parseInt(interaction.values[0])].label}, now choose a date`,
                     ephemeral: true,
-                    components: [raid["selectMenus"]["date"]],
+                    components: [Raid["selectMenus"]["date"]],
                 });
             }
 
-            if (interaction.customId === "date") {
+            if (interaction.customId === "date" && interaction.user.id === Raid.getUpdaterId()) {
                 await interaction.editReply({
-                    content: `You've chosen: ${raid.menus["date"][Number.parseInt(interaction.values[0])].label}, now choose a time`,
+                    content: `You've chosen: ${Raid.menus["date"][Number.parseInt(interaction.values[0])].label}, now choose a time`,
                     ephemeral: true,
-                    components: [raid["selectMenus"]["time"]],
+                    components: [Raid["selectMenus"]["time"]],
                 });
             }
 
-            if (interaction.customId === "time") {
+            if (interaction.customId === "time" && interaction.user.id === Raid.getUpdaterId()) {
                 await interaction.editReply({
                     content: `You've chosen: ${
-                        raid.menus["time"][Number.parseInt(interaction.values[0])].label
+                        Raid.menus["time"][Number.parseInt(interaction.values[0])].label
                     }. Creating object data, will connect database later, this is still in development so nothing is permanent`,
                     ephemeral: true,
                     components: [],
