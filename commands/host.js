@@ -1,24 +1,22 @@
 import { SlashCommandBuilder, ActionRowBuilder, SelectMenuBuilder } from "discord.js";
+import { Raid } from "../src/model/Raid.js";
 
 export const command = {
     data: new SlashCommandBuilder().setName("host").setDescription("Allows a user to host a raid"),
     async execute(interaction) {
         // create a Raid
-        const raid = {};
+        const raid = new Raid(interaction.user.tag);
 
         // create select menu
-        const menu = new ActionRowBuilder().addComponents(new SelectMenuBuilder().setCustomId("raid-type").setPlaceholder("Select Raid").addOptions());
+        const menu = new ActionRowBuilder().addComponents(
+            new SelectMenuBuilder().setCustomId("raid-type").setPlaceholder("Select Raid").addOptions(raid.menus["raid"])
+        );
 
-        // Get Raid Type
-
-        // Get Day of the week
-        // Translate that to a date
-
-        // Get Time of the day
-
-        await interaction.reply({
-            content: `Server: ${interaction.guild.name}\nMembers: ${interaction.guild.memberCount}\nMore information coming...`,
-            ephemeral: true,
-        });
+        try {
+            // Get Raid Type
+            await interaction.reply({ content: "Thanks for hosting a raid, please select a raid below:", ephemeral: true, components: [menu] });
+        } catch (e) {
+            await interaction.reply({ content: "Something went wrong", ephemeral: true });
+        }
     },
 };
