@@ -3,7 +3,7 @@ import { ActionRowBuilder, SelectMenuBuilder } from "discord.js";
 const times = [];
 
 for (let i = 0; i < 24; i++) {
-    times.push(`${Math.floor(i / 10)}${i}:00`);
+    times.push(`${Math.floor(i / 10)}${i % 10}:00`);
 }
 
 export class Raid {
