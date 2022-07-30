@@ -6,9 +6,10 @@ for (let i = 0; i < 24; i++) {
 
 export class Raid {
     // tag should be a discord tag
+    menus = {};
+
     constructor(tag) {
         this.host = tag;
-        this.menus = {};
         this.setup();
     }
 
@@ -31,3 +32,5 @@ export class Raid {
         this.menus["time"] = this.generateMenu(times);
     };
 }
+
+export const raid = new Raid();
