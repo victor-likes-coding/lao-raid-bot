@@ -1,4 +1,6 @@
-import { Raid } from "../model/Raid";
+import { ChatInputCommandInteraction, CommandInteraction, InteractionCollector, MessageInteraction, SelectMenuInteraction } from "discord.js";
+import { Raid, RaidType } from "../model/Raid";
+import moment from "moment";
 
 export const event = {
     name: "interactionCreate",
@@ -21,9 +23,9 @@ export const event = {
         if (interaction.isSelectMenu()) {
             await interaction.deferReply();
             if (interaction.customId === "raid" && interaction.user.id === Raid.getUpdaterId()) {
-                Raid.addRaidDetails(interaction.user.id, "raid", Raid.menus["raid"][Number.parseInt(interaction.values[0])].label);
+                Raid.addRaidDetails(interaction.user.id, "raid", Raid.menus["raid"][Number.parseInt(interaction.values[0])].value);
                 await interaction.editReply({
-                    content: `You've chosen: ${Raid.menus["raid"][Number.parseInt(interaction.values[0])].label}, now choose a date`,
+                    content: `You've chosen: ${Raid.menus["raid"][Number.parseInt(interaction.values[0])]}, now choose a date`,
                     ephemeral: true,
                     components: [Raid["selectMenus"]["date"]],
                 });
@@ -39,7 +41,25 @@ export const event = {
             }
 
             if (interaction.customId === "time" && interaction.user.id === Raid.getUpdaterId()) {
-                Raid.addRaidDetails(interaction.user.id, "time", Raid.menus["time"][Number.parseInt(interaction.values[0])].label);
+                const user = interaction.user.id;
+                Raid.addRaidDetails(user, "time", Raid.menus["time"][Number.parseInt(interaction.values[0])].value);
+
+                const { raid, date, time } = Raid.getLocalRaidDetails(user);
+
+                const raidObject: RaidType = {
+                    time: new Date(moment().day(date).hour(time).startOf("hour").toString()).getTime(),
+                    type: raid,
+                    characters: [],
+                    active: true,
+                };
+
+                try {
+                    // add to the database
+                    await Raid.add(raidObject);
+                } catch (e) {
+                    console.log("Using the add method didn't work");
+                }
+
                 await interaction.editReply({
                     content: `You've chosen: ${
                         Raid.menus["time"][Number.parseInt(interaction.values[0])].label
