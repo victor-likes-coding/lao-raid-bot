@@ -15,10 +15,9 @@ for (let i = 0; i < 24; i++) {
     times.push(`${Math.floor(i / 10)}${i % 10}:00`);
 }
 
-type RaidType = {
-    date: string;
+export type RaidType = {
     type: number;
-    time: string;
+    time: number;
     characters?: [];
     active?: boolean;
 };
@@ -35,8 +34,8 @@ type Menu = {
 type RaidConfiguration = {
     [key: string]: {
         date?: string;
-        time?: string;
-        raid?: string;
+        time?: number;
+        raid?: number;
     };
 };
 
@@ -49,12 +48,16 @@ export class Raid {
 
     static raids: RaidConfiguration = {};
 
-    static addRaidDetails = (user: string, key: "date" | "time" | "raid", value: string): void => {
+    static addRaidDetails = (user: string, key: "date" | "time" | "raid", value: string | number): void => {
         if (!Raid.raids[user]) {
             Raid.raids[user] = {};
         }
 
-        Raid.raids[user][key] = value;
+        if (key === "date") {
+            Raid.raids[user][key] = value as string;
+        } else if (key === "raid" || key === "time") {
+            Raid.raids[user][key] = value as number;
+        }
     };
 
     static generateMenu = (list: string[]): MenuItem[] => {
@@ -108,6 +111,11 @@ export class Raid {
         return this;
     };
 
+    static getLocalRaidDetails = (user: string) => {
+        // get all of the raids that are locally stored
+        return Raid.raids[user];
+    };
+
     // DB functions
     static add = async (raid: RaidType) => {
         /**
@@ -116,7 +124,7 @@ export class Raid {
          *      date: string
          *      type: number
          *      time: string
-         *      characters: [Character]
+         *      characters: [Character.id]
          *      active: boolean
          * }
          */
