@@ -1,12 +1,14 @@
-import { Client, Collection, GatewayIntentBits, Routes } from "discord.js";
-import { read } from "./read.js";
+import { Collection, GatewayIntentBits, Routes } from "discord.js";
+import { SuperClient } from "../model/SuperClient";
+import { read } from "./read";
 import { REST } from "@discordjs/rest";
-import { config } from "../../config.js";
-import { Raid } from "../model/Raid.js";
+import { config } from "../../config";
+import { Raid } from "../model/Raid";
+import path from "path";
 
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { config as firebaseConfig } from "../../firebase.config.js";
+import { config as firebaseConfig } from "../../firebase.config";
 
 // TODO: Replace the following with your app's Firebase project configuration
 // See: https://firebase.google.com/docs/web/learn-more#config-object
@@ -22,9 +24,11 @@ const options = {
 };
 
 class Bot {
-    client = new Client(options);
-    eventFiles = read("./events");
-    commandFiles = read("./commands");
+    client = new SuperClient(options);
+
+    // Theory: use relative path of the start of the bot call which is in /index.ts
+    eventFiles = read("./src/events");
+    commandFiles = read("./src/commands");
     rest = new REST({ version: "10" }).setToken(config.token);
 
     constructor() {
@@ -35,7 +39,7 @@ class Bot {
         /**
          * Returns a simplified array of objects of the command list instead of the discordjs Collections data type.
          */
-        return Array.from(this.client.commands.values()).map(({ data }) => data.toJSON());
+        return this.client.commands.toJSON();
     }
 
     async setEvents() {
@@ -54,6 +58,7 @@ class Bot {
             const { command } = await import(`../commands/${file}`);
             // set a new item in the Collection
             // with the key as the command name and the value as the exported module
+            console.log(command);
             this.client.commands.set(command.data.name, command);
         }
     }
@@ -65,7 +70,7 @@ class Bot {
         Raid.setup();
     }
 
-    async updateCommands(guild_id) {
+    async updateCommands(guild_id: string) {
         (async () => {
             try {
                 console.log("Started refreshing application (/) commands.");

@@ -1,5 +1,5 @@
 import { config } from "../config";
-import { bot } from "../utils/client";
+import { bot } from "../src/utils/client";
 
 bot.start();
 

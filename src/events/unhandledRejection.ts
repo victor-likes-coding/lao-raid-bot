@@ -1,6 +1,6 @@
 export const event = {
-  name: "unhandledRejection",
-  execute(error) {
-    console.error("Unhandled promise rejection:", error);
-  },
+    name: "unhandledRejection",
+    execute(error: PromiseRejectionEvent) {
+        console.error("Unhandled promise rejection:", error);
+    },
 };

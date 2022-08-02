@@ -1,22 +1,55 @@
-import { ActionRowBuilder, SelectMenuBuilder } from "discord.js";
-import { db } from "../../utils/client.js";
+import {
+    ActionRowBuilder,
+    AnyComponentBuilder,
+    APISelectMenuOption,
+    SelectMenuBuilder,
+    SelectMenuComponentOptionData,
+    SelectMenuOptionBuilder,
+} from "discord.js";
+import { addDoc, collection } from "firebase/firestore";
+import { db } from "../utils/client";
 
-const times = [];
+const times: string[] = [];
 
 for (let i = 0; i < 24; i++) {
     times.push(`${Math.floor(i / 10)}${i % 10}:00`);
 }
 
+type RaidType = {
+    date: string;
+    type: number;
+    time: string;
+    characters?: [];
+    active?: boolean;
+};
+
+type MenuItem = {
+    label: string;
+    value: string;
+};
+
+type Menu = {
+    [key: string]: MenuItem[];
+};
+
+type RaidConfiguration = {
+    [key: string]: {
+        date?: string;
+        time?: string;
+        raid?: string;
+    };
+};
+
 export class Raid {
     // tag should be a discord tag
-    static menus = {};
-    static selectMenus = {};
-    static __currentUpdater = "";
-    static __updaterId = null;
+    static menus: Menu = {};
+    static selectMenus: { [key: string]: ActionRowBuilder<SelectMenuBuilder> } = {};
+    static __currentUpdater: string = "";
+    static __updaterId: string = null;
 
-    static raids = {};
+    static raids: RaidConfiguration = {};
 
-    static addRaidDetails = (user, key, value) => {
+    static addRaidDetails = (user: string, key: "date" | "time" | "raid", value: string): void => {
         if (!Raid.raids[user]) {
             Raid.raids[user] = {};
         }
@@ -24,8 +57,8 @@ export class Raid {
         Raid.raids[user][key] = value;
     };
 
-    static generateMenu = (list) => {
-        return list.reduce((prev, current, index) => {
+    static generateMenu = (list: string[]): MenuItem[] => {
+        return list.reduce((prev, current, index: number) => {
             return prev.concat({
                 label: current,
                 value: index.toString(),
@@ -48,15 +81,20 @@ export class Raid {
         this.selectMenus["time"] = Raid.createSelectMenus("time", "Select Time");
     };
 
-    static createSelectMenus = (type, placeholder) => {
-        return new ActionRowBuilder().addComponents(new SelectMenuBuilder().setCustomId(type).setPlaceholder(placeholder).addOptions(this.menus[type]));
+    static createSelectMenus = (type: string, placeholder: string): ActionRowBuilder<SelectMenuBuilder> => {
+        return new ActionRowBuilder().addComponents(
+            new SelectMenuBuilder()
+                .setCustomId(type)
+                .setPlaceholder(placeholder)
+                .addOptions(this.menus[type] as SelectMenuComponentOptionData[])
+        ) as ActionRowBuilder<SelectMenuBuilder>;
     };
 
     static getUpdater = () => {
         return this.__currentUpdater;
     };
 
-    static addUpdater = (tag) => {
+    static addUpdater = (tag: string) => {
         this.__currentUpdater = tag;
         return this;
     };
@@ -65,13 +103,13 @@ export class Raid {
         return this.__updaterId;
     };
 
-    static addUpdaterId = (id) => {
+    static addUpdaterId = (id: string) => {
         this.__updaterId = id;
         return this;
     };
 
     // DB functions
-    static add = async (raid) => {
+    static add = async (raid: RaidType) => {
         /**
          * @raid is an object
          * {

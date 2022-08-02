@@ -1,8 +1,8 @@
-import { Raid } from "../model/Raid.js";
+import { Raid } from "../model/Raid";
 
 export const event = {
     name: "interactionCreate",
-    async execute(interaction) {
+    async execute(interaction: any) {
         // check if command
         if (interaction.isCommand()) {
             if (!interaction.client.commands.has(interaction.commandName)) return;
@@ -10,12 +10,8 @@ export const event = {
             try {
                 return interaction.client.commands.get(interaction.commandName).execute(interaction);
             } catch (error) {
-                const message = new ErrorMessage({
-                    title: "Error",
-                    description: "There was an error while executing this command!",
-                });
                 await interaction.reply({
-                    embeds: [message.content],
+                    embeds: ["There was an issue with this command"],
                     ephemeral: true,
                 });
             }
