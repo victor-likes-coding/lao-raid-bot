@@ -39,7 +39,9 @@ class Bot {
         /**
          * Returns a simplified array of objects of the command list instead of the discordjs Collections data type.
          */
-        return this.client.commands.toJSON();
+        return this.client.commands.map((val) => {
+            return val.data;
+        });
     }
 
     async setEvents() {
@@ -58,7 +60,6 @@ class Bot {
             const { command } = await import(`../commands/${file}`);
             // set a new item in the Collection
             // with the key as the command name and the value as the exported module
-            console.log(command);
             this.client.commands.set(command.data.name, command);
         }
     }
