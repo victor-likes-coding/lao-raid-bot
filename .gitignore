@@ -119,5 +119,7 @@ dist
 
 
 # custom configuration
-*config.json
-*config.js
+config.js
+firebase.config.js
+config.json
+config.ts
