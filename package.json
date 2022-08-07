@@ -24,6 +24,7 @@
     "dependencies": {
         "@discordjs/rest": "^1.0.1",
         "discord.js": "^14.1.1",
-        "firebase": "^9.9.1"
+        "firebase": "^9.9.1",
+        "moment": "^2.29.4"
     }
 }
