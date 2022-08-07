@@ -146,8 +146,16 @@ export class Raid {
         }
     };
 
-    static get = async () => {
+    static getById = async (id: string) => {
+        const raidRef = doc(db, "raids", id);
         try {
-        } catch (e) {}
+            return await getDoc(raidRef);
+        } catch (e) {
+            console.log("Something went wrong with getting a raid by ID");
+            return new Promise((res) => {
+                res([]);
+            });
+        }
+    };
     };
 }
