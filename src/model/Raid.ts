@@ -16,8 +16,8 @@ for (let i = 0; i < 24; i++) {
 }
 
 export type RaidType = {
-    type: number;
-    time: number;
+    type?: number;
+    time?: number;
     characters?: [];
     active?: boolean;
 };
@@ -135,5 +135,10 @@ export class Raid {
         } catch (e) {
             console.error("Error adding document: ", e);
         }
+    };
+
+    static get = async () => {
+        try {
+        } catch (e) {}
     };
 }
