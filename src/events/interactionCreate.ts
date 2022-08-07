@@ -25,7 +25,7 @@ export const event = {
             if (interaction.customId === "raid" && interaction.user.id === Raid.getUpdaterId()) {
                 Raid.addRaidDetails(interaction.user.id, "raid", Raid.menus["raid"][Number.parseInt(interaction.values[0])].value);
                 await interaction.editReply({
-                    content: `You've chosen: ${Raid.menus["raid"][Number.parseInt(interaction.values[0])]}, now choose a date`,
+                    content: `You've chosen: ${Raid.menus["raid"][Number.parseInt(interaction.values[0])].label}, now choose a date`,
                     ephemeral: true,
                     components: [Raid["selectMenus"]["date"]],
                 });
@@ -47,11 +47,15 @@ export const event = {
                 const { raid, date, time } = Raid.getLocalRaidDetails(user);
 
                 const raidObject: RaidType = {
-                    time: new Date(moment().day(date).hour(time).startOf("hour").toString()).getTime(),
+                    time:
+                        new Date(moment().day(date).hour(time).startOf("hour").toString()).getTime() < Date.now()
+                            ? new Date(moment().day(date).hour(time).startOf("hour").toString()).getTime() + 60 * 60 * 24 * 7 * 1000
+                            : new Date(moment().day(date).hour(time).startOf("hour").toString()).getTime(),
                     type: raid,
                     characters: [],
                     active: true,
                 };
+                console.log(moment(raidObject.time).format("MM/DD dddd HH:mm"));
 
                 try {
                     // add to the database
@@ -63,7 +67,7 @@ export const event = {
                 await interaction.editReply({
                     content: `You've chosen: ${
                         Raid.menus["time"][Number.parseInt(interaction.values[0])].label
-                    }. Creating object data, will connect database later, this is still in development so nothing is permanent`,
+                    }. Raid created, please use /raids to see all raids, other features are being implemented so bear with me.`,
                     ephemeral: true,
                     components: [],
                 });
