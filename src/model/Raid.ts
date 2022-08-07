@@ -137,6 +137,15 @@ export class Raid {
         }
     };
 
+    static get = async (table: string): Promise<QuerySnapshot<DocumentData>> => {
+        try {
+            return await getDocs(collection(db, table));
+        } catch (e) {
+            console.log(`Something went wrong with getting ${table} collection`);
+            return;
+        }
+    };
+
     static get = async () => {
         try {
         } catch (e) {}
