@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ActionRowBuilder, SelectMenuBuilder, CommandInteraction } from "discord.js";
+import { SlashCommandBuilder, CommandInteraction } from "discord.js";
 import { Raid } from "../model/Raid";
 
 export const command = {
