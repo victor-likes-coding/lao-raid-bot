@@ -1,6 +1,6 @@
 import { Collection, GatewayIntentBits, Routes } from "discord.js";
 import { SuperClient } from "../model/SuperClient";
-import { read } from "./read";
+import { read } from "./file";
 import { REST } from "@discordjs/rest";
 import { config } from "../../config";
 import { Raid } from "../model/Raid";
@@ -68,7 +68,7 @@ class Bot {
         await this.setCommands();
         await this.setEvents();
         await this.updateCommands(config.guildId);
-        Raid.setup();
+        await Raid.setup();
     }
 
     async updateCommands(guild_id: string) {
