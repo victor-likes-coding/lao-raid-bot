@@ -51,7 +51,7 @@ export const command = {
                 // add this information into DB
                 if (fileExists(Raid.pathToRaidFile)) {
                     // check if we have that raid by checking against the name
-                    /* file structure:
+                    /* data structure:
                  * {
                   name: {
                     id,
