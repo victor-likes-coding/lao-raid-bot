@@ -56,6 +56,7 @@ export class Raid {
     static selectMenus: { [key: string]: ActionRowBuilder<SelectMenuBuilder> } = {};
     static __currentUpdater: string = "";
     static __updaterId: string = null;
+    static pathToRaidFile = path.join(__dirname, "..", "data", "raid.json");
 
     static raids: RaidConfiguration = {};
 
