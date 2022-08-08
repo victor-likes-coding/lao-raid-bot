@@ -181,5 +181,10 @@ export class Raid {
             });
         }
     };
+
+    static addRaidContent = async (options: RaidContent) => {
+        // Check and see if we have that raid already by checking local file
+
+        return await addDoc(collection(db, "raid-types"), options);
     };
 }
