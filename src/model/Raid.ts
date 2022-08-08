@@ -22,6 +22,21 @@ export type RaidType = {
     active?: boolean;
 };
 
+export type RaidContent = {
+    name?: string;
+    id?: string;
+    ilevel?: number;
+    memberLimit?: number;
+};
+
+export type RaidJSON = {
+    [name: string]: {
+        id: string;
+        ilevel: number;
+        memberLimit: number;
+    };
+};
+
 type MenuItem = {
     label: string;
     value: string;
