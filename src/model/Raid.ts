@@ -69,7 +69,7 @@ export class Raid {
         }, []);
     };
 
-    static setup = () => {
+    static setup = async () => {
         // sets up the menus of the raid object
 
         // we have actual raids menu and a dates menu as well as a time menu
@@ -82,6 +82,30 @@ export class Raid {
         this.selectMenus["raid"] = Raid.createSelectMenus("raid", "Select Raid");
         this.selectMenus["date"] = Raid.createSelectMenus("date", "Select Date");
         this.selectMenus["time"] = Raid.createSelectMenus("time", "Select Time");
+
+        // create a raid.json in ../data if one doesn't exist, pull existing raids into it
+        if (!fileExists(Raid.pathToRaidFile)) {
+            const data = JSON.stringify({});
+            fs.writeFileSync(Raid.pathToRaidFile, data);
+        }
+
+        // needs to handle cases where there's 0 in that db
+
+        // load data from db
+        const parsedRaid = JSON.parse(fs.readFileSync(Raid.pathToRaidFile, "utf-8"));
+        const raidDocs = await Raid.get("raids-type");
+        raidDocs.forEach((doc) => {
+            const data = doc.data();
+            parsedRaid[data.name] = {
+                id: doc.id,
+                ilevel: data.ilevel,
+                memberLimit: data.memberLimit,
+            };
+        });
+
+        // store this back into that raid.json
+        const data = JSON.stringify(parsedRaid);
+        fs.writeFileSync(Raid.pathToRaidFile, data);
     };
 
     static createSelectMenus = (type: string, placeholder: string): ActionRowBuilder<SelectMenuBuilder> => {
