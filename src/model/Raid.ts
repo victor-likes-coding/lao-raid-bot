@@ -83,10 +83,10 @@ export class Raid {
 
     static setup = async () => {
         // sets up the menus of the raid object
+        await Raid.loadRaidData();
 
         // we have actual raids menu and a dates menu as well as a time menu
         // raid menu
-        this.menus["raid"] = Raid.generateMenu(["Argos P1", "Argos P2", "Argos P3", "Valtan NM", "Valtan HM", "Vykas NM", "Vykas HM"]);
         this.menus["date"] = Raid.generateMenu(["Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "Monday", "Tuesday"]);
         this.menus["time"] = Raid.generateMenu(times);
 
@@ -94,14 +94,23 @@ export class Raid {
         this.selectMenus["raid"] = Raid.createSelectMenus("raid", "Select Raid");
         this.selectMenus["date"] = Raid.createSelectMenus("date", "Select Date");
         this.selectMenus["time"] = Raid.createSelectMenus("time", "Select Time");
+    };
 
+    static createSelectMenus = (type: string, placeholder: string): ActionRowBuilder<SelectMenuBuilder> => {
+        return new ActionRowBuilder().addComponents(
+            new SelectMenuBuilder()
+                .setCustomId(type)
+                .setPlaceholder(placeholder)
+                .addOptions(this.menus[type] as SelectMenuComponentOptionData[])
+        ) as ActionRowBuilder<SelectMenuBuilder>;
+    };
+
+    static loadRaidData = async () => {
         // create a raid.json in ../data if one doesn't exist, pull existing raids into it
         if (!fileExists(Raid.pathToRaidFile)) {
             const data = JSON.stringify({});
             fs.writeFileSync(Raid.pathToRaidFile, data);
         }
-
-        // needs to handle cases where there's 0 in that db
 
         // load data from db
         const parsedRaid = JSON.parse(fs.readFileSync(Raid.pathToRaidFile, "utf-8"));
@@ -118,15 +127,9 @@ export class Raid {
         // store this back into that raid.json
         const data = JSON.stringify(parsedRaid);
         fs.writeFileSync(Raid.pathToRaidFile, data);
-    };
 
-    static createSelectMenus = (type: string, placeholder: string): ActionRowBuilder<SelectMenuBuilder> => {
-        return new ActionRowBuilder().addComponents(
-            new SelectMenuBuilder()
-                .setCustomId(type)
-                .setPlaceholder(placeholder)
-                .addOptions(this.menus[type] as SelectMenuComponentOptionData[])
-        ) as ActionRowBuilder<SelectMenuBuilder>;
+        // store it locally
+        this.menus["raid"] = Raid.generateMenu(Object.keys(parsedRaid));
     };
 
     static getUpdater = () => {
