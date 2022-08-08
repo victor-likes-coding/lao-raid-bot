@@ -4,8 +4,8 @@ import moment from "moment";
 export const event = {
     name: "interactionCreate",
     async execute(interaction: any) {
-        // check if command
-        if (interaction.isCommand()) {
+        // check if chat inputs
+        if (interaction.isChatInputCommand()) {
             if (!interaction.client.commands.has(interaction.commandName)) return;
 
             try {
