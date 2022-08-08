@@ -1,4 +1,4 @@
-import { collection, getDocs } from "firebase/firestore";
+import { collection, DocumentData, getDocs, QuerySnapshot } from "firebase/firestore";
 import { SlashCommandBuilder, CommandInteraction } from "discord.js";
 import { Raid } from "../model/Raid";
 import { db } from "../utils/client";
@@ -9,10 +9,10 @@ export const command = {
     async execute(interaction: CommandInteraction) {
         try {
             // get raids
-            const querySnapshot = await getDocs(collection(db, "raids"));
+            const raids = await Raid.get("raids");
             let message = "";
             let index = 1;
-            querySnapshot.forEach((doc) => {
+            raids.forEach((doc) => {
                 // doc.data() is never undefined for query doc snapshots
                 // Only grab docs where the time > now
                 // check now and compare to doc.time and see if now > doc.time
