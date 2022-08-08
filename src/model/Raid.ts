@@ -1,12 +1,8 @@
-import {
-    ActionRowBuilder,
-    AnyComponentBuilder,
-    APISelectMenuOption,
-    SelectMenuBuilder,
-    SelectMenuComponentOptionData,
-    SelectMenuOptionBuilder,
-} from "discord.js";
-import { addDoc, collection } from "firebase/firestore";
+import fs from "fs";
+import path from "path";
+import { ActionRowBuilder, SelectMenuBuilder, SelectMenuComponentOptionData } from "discord.js";
+import { addDoc, collection, doc, DocumentData, getDoc, getDocs, QuerySnapshot } from "firebase/firestore";
+import { fileExists } from "../utils/file";
 import { db } from "../utils/client";
 
 const times: string[] = [];
