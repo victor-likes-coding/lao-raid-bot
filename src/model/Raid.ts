@@ -4,6 +4,7 @@ import { ActionRowBuilder, SelectMenuBuilder, SelectMenuComponentOptionData } fr
 import { addDoc, collection, doc, DocumentData, getDoc, getDocs, QuerySnapshot } from "firebase/firestore";
 import { fileExists } from "../utils/file";
 import { db } from "../utils/client";
+import { async } from "@firebase/util";
 
 const times: string[] = [];
 
@@ -12,10 +13,20 @@ for (let i = 0; i < 24; i++) {
 }
 
 export type RaidType = {
+    // This is for DB
     type?: number;
     time?: number;
     characters?: [];
     active?: boolean;
+};
+
+export type ClassType = {
+    // This is for DB
+    name?: string;
+    firstEngraving?: string;
+    secondEngraving?: string;
+    synergy?: string;
+    type?: string;
 };
 
 export type RaidContent = {
@@ -23,6 +34,15 @@ export type RaidContent = {
     id?: string;
     ilevel?: number;
     memberLimit?: number;
+};
+
+export type ClassContent = {
+    name?: string;
+    id?: string;
+    firstEngraving?: string;
+    secondEngraving?: string;
+    synergy?: string;
+    type?: "DPS" | "Support";
 };
 
 export type RaidJSON = {
@@ -57,6 +77,7 @@ export class Raid {
     static __currentUpdater: string = "";
     static __updaterId: string = null;
     static pathToRaidFile = path.join(__dirname, "..", "data", "raid.json");
+    static pathToClassFile = path.join(__dirname, "..", "data", "class.json");
 
     static raids: RaidConfiguration = {};
 
@@ -83,7 +104,8 @@ export class Raid {
 
     static setup = async () => {
         // sets up the menus of the raid object
-        await Raid.loadRaidData();
+        await Raid.loadData("raid-types", Raid.pathToRaidFile);
+        await Raid.loadData("classes", Raid.pathToClassFile);
 
         // we have actual raids menu and a dates menu as well as a time menu
         // raid menu
@@ -105,31 +127,48 @@ export class Raid {
         ) as ActionRowBuilder<SelectMenuBuilder>;
     };
 
-    static loadRaidData = async () => {
-        // create a raid.json in ../data if one doesn't exist, pull existing raids into it
-        if (!fileExists(Raid.pathToRaidFile)) {
+    static loadData = async (type: string, filePath: string) => {
+        if (!fileExists(filePath)) {
             const data = JSON.stringify({});
+            fs.writeFileSync(filePath, data);
+        }
+
+        const parsed = JSON.parse(fs.readFileSync(filePath, "utf-8") || JSON.stringify({}));
+
+        if (type === "raid-types") {
+            // load data from db
+            const docs = await Raid.get(type);
+            docs.forEach((doc) => {
+                const data = doc.data();
+                parsed[data.name] = {
+                    id: doc.id,
+                    ilevel: data.ilevel,
+                    memberLimit: data.memberLimit,
+                };
+            });
+            this.menus["raid"] = Raid.generateMenu(Object.keys(parsed));
+            // store this back into that raid.json
+            const data = JSON.stringify(parsed);
             fs.writeFileSync(Raid.pathToRaidFile, data);
         }
 
-        // load data from db
-        const parsedRaid = JSON.parse(fs.readFileSync(Raid.pathToRaidFile, "utf-8"));
-        const raidDocs = await Raid.get("raids-type");
-        raidDocs.forEach((doc) => {
-            const data = doc.data();
-            parsedRaid[data.name] = {
-                id: doc.id,
-                ilevel: data.ilevel,
-                memberLimit: data.memberLimit,
-            };
-        });
+        if (type === "classes") {
+            const docs = await Raid.get(type);
+            docs.forEach((doc) => {
+                const data = doc.data();
+                parsed[data.name] = {
+                    id: doc.id,
+                    firstEngraving: data.firstEngraving,
+                    secondEngraving: data.secondEngraving,
+                    synergy: data.synergy,
+                    type: data.type,
+                };
+            });
 
-        // store this back into that raid.json
-        const data = JSON.stringify(parsedRaid);
-        fs.writeFileSync(Raid.pathToRaidFile, data);
-
-        // store it locally
-        this.menus["raid"] = Raid.generateMenu(Object.keys(parsedRaid));
+            // store this back into that class.json
+            const data = JSON.stringify(parsed);
+            fs.writeFileSync(filePath, data);
+        }
     };
 
     static getUpdater = () => {
@@ -201,5 +240,9 @@ export class Raid {
         // Check and see if we have that raid already by checking local file
 
         return await addDoc(collection(db, "raid-types"), options);
+    };
+
+    static addClassContent = async (options: ClassContent) => {
+        return await addDoc(collection(db, "classes"), options);
     };
 }
