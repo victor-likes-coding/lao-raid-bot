@@ -33,6 +33,25 @@ export const command = {
                         .setName("type")
                         .setDescription("Name the class")
                         .addStringOption((option) => option.setRequired(true).setName("name").setDescription("Name the class"))
+                        .addStringOption((option) =>
+                            option.setRequired(true).setName("class-engraving-1").setDescription("Enter a class engraving of that class")
+                        )
+                        .addStringOption((option) =>
+                            option.setRequired(true).setName("class-engraving-2").setDescription("Enter a class engraving of that class")
+                        )
+                        .addStringOption((option) => option.setRequired(true).setName("synergy").setDescription("Enter what this class brings to raids"))
+                        .addIntegerOption((option) =>
+                            option.setRequired(true).setName("type").setDescription("Enter what this class brings to raids").addChoices(
+                                {
+                                    name: "Support",
+                                    value: 0,
+                                },
+                                {
+                                    name: "DPS",
+                                    value: 1,
+                                }
+                            )
+                        )
                 )
         ),
     async execute(interaction: CommandInteraction) {
