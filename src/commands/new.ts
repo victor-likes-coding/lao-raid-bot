@@ -5,7 +5,7 @@ import { sha256 } from "js-sha256";
 import { fileExists } from "../utils/file";
 import { config } from "../../config";
 import { db } from "../utils/client";
-import { Raid, RaidContent, RaidJSON } from "../model/Raid";
+import { ClassContent, Raid, RaidContent, RaidJSON } from "../model/Raid";
 
 export const command = {
     data: new SlashCommandBuilder()
@@ -116,15 +116,59 @@ export const command = {
                     }
                 }
             }
-        }
 
-        try {
-            await interaction.reply({
-                content: "Unauthorized",
-                ephemeral: true,
-            });
-        } catch (e) {
-            await interaction.reply({ content: "Something went wrong" });
+            if (name === "class") {
+                const [name, firstEngraving, secondEngraving, synergy, type] = interaction.options.data[0].options[0].options;
+
+                const parsed = JSON.parse(fs.readFileSync(Raid.pathToClassFile, "utf-8"));
+                const duplicated = Object.keys(parsed).filter((key: string) => key.toLowerCase() === (name.value as string).toLowerCase()).length;
+                if (!duplicated) {
+                    // means we should add to db and add to class.json
+                    const classOptions: ClassContent = {
+                        name: name.value as string,
+                        firstEngraving: firstEngraving.value as string,
+                        secondEngraving: secondEngraving.value as string,
+                        synergy: synergy.value as string,
+                        type: ["Support", "DPS"][type.value as number] as "Support" | "DPS",
+                    };
+
+                    const doc = await Raid.addClassContent(classOptions);
+                    const data = (await getDoc(doc)).data();
+
+                    parsed[data.name] = {
+                        id: doc.id,
+                        firstEngraving: data.firstEngraving,
+                        secondEngraving: data.secondEngraving,
+                        synergy: data.synergy,
+                        type: data.type,
+                    };
+                    // Write to a local file and only write to it when new stuff gets added
+                    console.log(data);
+                    console.log(parsed[data.name]);
+
+                    fs.writeFileSync(Raid.pathToClassFile, JSON.stringify(parsed));
+
+                    try {
+                        return await interaction.reply({ content: "Class type added!", ephemeral: true });
+                    } catch (e) {
+                        return await interaction.reply({ content: "Something went wrong for authorized user", ephemeral: true });
+                    }
+                }
+                try {
+                    return await interaction.reply({ content: "This class has been added before", ephemeral: true });
+                } catch (e) {
+                    return await interaction.reply({ content: "Something went wrong with replying that the raid has been added before", ephemeral: true });
+                }
+            }
+
+            try {
+                await interaction.reply({
+                    content: "Unauthorized",
+                    ephemeral: true,
+                });
+            } catch (e) {
+                await interaction.reply({ content: "Something went wrong" });
+            }
         }
     },
 };
