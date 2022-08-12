@@ -1,10 +1,10 @@
 import fs from "fs";
 import path from "path";
-import { ActionRowBuilder, SelectMenuBuilder, SelectMenuComponentOptionData } from "discord.js";
+import moment from "moment";
+import { CacheType, CommandInteractionOption } from "discord.js";
 import { addDoc, collection, doc, DocumentData, getDoc, getDocs, QuerySnapshot } from "firebase/firestore";
 import { fileExists } from "../utils/file";
 import { db } from "../utils/client";
-import { async } from "@firebase/util";
 
 const times: string[] = [];
 
@@ -14,7 +14,7 @@ for (let i = 0; i < 24; i++) {
 
 export type RaidType = {
     // This is for DB
-    type?: number;
+    type?: string;
     time?: number;
     characters?: [];
     active?: boolean;
@@ -52,9 +52,18 @@ export type RaidJSON = {
         memberLimit: number;
     };
 };
+export type ClassJSON = {
+    [name: string]: {
+        id?: string;
+        firstEngraving?: string;
+        secondEngraving?: string;
+        synergy?: string;
+        type?: "DPS" | "Support";
+    };
+};
 
 type MenuItem = {
-    label: string;
+    name: string;
     value: string;
 };
 
@@ -73,125 +82,47 @@ type RaidConfiguration = {
 export class Raid {
     // tag should be a discord tag
     static menus: Menu = {};
-    static selectMenus: { [key: string]: ActionRowBuilder<SelectMenuBuilder> } = {};
-    static __currentUpdater: string = "";
-    static __updaterId: string = null;
     static pathToRaidFile = path.join(__dirname, "..", "data", "raid.json");
     static pathToClassFile = path.join(__dirname, "..", "data", "class.json");
-
-    static raids: RaidConfiguration = {};
-
-    static addRaidDetails = (user: string, key: "date" | "time" | "raid", value: string | number): void => {
-        if (!Raid.raids[user]) {
-            Raid.raids[user] = {};
-        }
-
-        if (key === "date") {
-            Raid.raids[user][key] = value as string;
-        } else if (key === "raid" || key === "time") {
-            Raid.raids[user][key] = value as number;
-        }
-    };
 
     static generateMenu = (list: string[]): MenuItem[] => {
         return list.reduce((prev, current, index: number) => {
             return prev.concat({
-                label: current,
-                value: index.toString(),
+                name: current,
+                value: current,
             });
         }, []);
     };
 
     static setup = async () => {
         // sets up the menus of the raid object
-        await Raid.loadData("raid-types", Raid.pathToRaidFile);
-        await Raid.loadData("classes", Raid.pathToClassFile);
+        await Raid.loadData("raid-types");
+        await Raid.loadData("classes");
 
-        // we have actual raids menu and a dates menu as well as a time menu
         // raid menu
         this.menus["date"] = Raid.generateMenu(["Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "Monday", "Tuesday"]);
         this.menus["time"] = Raid.generateMenu(times);
-
-        // selectmenus
-        this.selectMenus["raid"] = Raid.createSelectMenus("raid", "Select Raid");
-        this.selectMenus["date"] = Raid.createSelectMenus("date", "Select Date");
-        this.selectMenus["time"] = Raid.createSelectMenus("time", "Select Time");
     };
 
-    static createSelectMenus = (type: string, placeholder: string): ActionRowBuilder<SelectMenuBuilder> => {
-        return new ActionRowBuilder().addComponents(
-            new SelectMenuBuilder()
-                .setCustomId(type)
-                .setPlaceholder(placeholder)
-                .addOptions(this.menus[type] as SelectMenuComponentOptionData[])
-        ) as ActionRowBuilder<SelectMenuBuilder>;
-    };
+    static loadData = async (type: "raid-types" | "classes") => {
+        let filePath = "";
 
-    static loadData = async (type: string, filePath: string) => {
+        if (type === "raid-types") {
+            filePath = Raid.pathToRaidFile;
+        } else if (type === "classes") {
+            filePath = Raid.pathToClassFile;
+        } else {
+            throw new Error("storeLocalData: requires type to be raid-types or classes");
+        }
+
         if (!fileExists(filePath)) {
             const data = JSON.stringify({});
             fs.writeFileSync(filePath, data);
         }
 
-        const parsed = JSON.parse(fs.readFileSync(filePath, "utf-8") || JSON.stringify({}));
+        const parsed = await Raid.parseData(type);
 
-        if (type === "raid-types") {
-            // load data from db
-            const docs = await Raid.get(type);
-            docs.forEach((doc) => {
-                const data = doc.data();
-                parsed[data.name] = {
-                    id: doc.id,
-                    ilevel: data.ilevel,
-                    memberLimit: data.memberLimit,
-                };
-            });
-            this.menus["raid"] = Raid.generateMenu(Object.keys(parsed));
-            // store this back into that raid.json
-            const data = JSON.stringify(parsed);
-            fs.writeFileSync(Raid.pathToRaidFile, data);
-        }
-
-        if (type === "classes") {
-            const docs = await Raid.get(type);
-            docs.forEach((doc) => {
-                const data = doc.data();
-                parsed[data.name] = {
-                    id: doc.id,
-                    firstEngraving: data.firstEngraving,
-                    secondEngraving: data.secondEngraving,
-                    synergy: data.synergy,
-                    type: data.type,
-                };
-            });
-
-            // store this back into that class.json
-            const data = JSON.stringify(parsed);
-            fs.writeFileSync(filePath, data);
-        }
-    };
-
-    static getUpdater = () => {
-        return this.__currentUpdater;
-    };
-
-    static addUpdater = (tag: string) => {
-        this.__currentUpdater = tag;
-        return this;
-    };
-
-    static getUpdaterId = () => {
-        return this.__updaterId;
-    };
-
-    static addUpdaterId = (id: string) => {
-        this.__updaterId = id;
-        return this;
-    };
-
-    static getLocalRaidDetails = (user: string) => {
-        // get all of the raids that are locally stored
-        return Raid.raids[user];
+        Raid.storeLocalData(type, parsed);
     };
 
     // DB functions
@@ -236,6 +167,8 @@ export class Raid {
         }
     };
 
+    // End DB functions
+
     static addRaidContent = async (options: RaidContent) => {
         // Check and see if we have that raid already by checking local file
 
@@ -244,5 +177,115 @@ export class Raid {
 
     static addClassContent = async (options: ClassContent) => {
         return await addDoc(collection(db, "classes"), options);
+    };
+
+    static createRaidObject = (data: readonly CommandInteractionOption<CacheType>[]): RaidType => {
+        const [{ value: raidValue }, { value: dateValue }, { value: timeValue }] = data;
+
+        const raid = raidValue as string;
+        const time = Number.parseInt((timeValue as string).split(":")[0]);
+        const date = dateValue as string;
+
+        return {
+            time:
+                new Date(moment().day(date).hour(time).startOf("hour").toString()).getTime() < Date.now()
+                    ? new Date(moment().day(date).hour(time).startOf("hour").toString()).getTime() + 60 * 60 * 24 * 7 * 1000
+                    : new Date(moment().day(date).hour(time).startOf("hour").toString()).getTime(),
+            type: raid,
+            characters: [],
+            active: true,
+        };
+    };
+
+    static showRaids = async (date: string | undefined) => {
+        const raids = await Raid.get("raids");
+        let index = 1;
+        let dateStrings: string[] = [];
+
+        // if (date) {
+        //     message += `Showing raids on ${date}:\n`;
+        // }
+        raids.forEach((doc) => {
+            // doc.data() is never undefined for query doc snapshots
+            // Only grab docs where the time > now
+            // check now and compare to doc.time and see if now > doc.time
+            // only return raids where doc.time > now
+            // turn doc into a Raid object
+
+            const raidDoc = doc.data();
+            if (date) {
+                // turn raidDoc.time into a date
+                const raidDate = moment(raidDoc.time).format("dddd");
+                if (raidDate === date) {
+                    const dateInfo = moment(raidDoc.time).format("MM/DD dddd @ HH:mm ZZ");
+                    dateStrings.push(`\`\`\`${index++}. ${raidDoc.type}\nWhen: ${dateInfo}\nSpace: ${raidDoc.characters.length}\`\`\`\n`);
+                }
+            } else {
+                if (raidDoc.time > Date.now()) {
+                    const dateInfo = moment(raidDoc.time).format("MM/DD dddd @ HH:mm ZZ");
+                    dateStrings.push(`\`\`\`${index++}. ${raidDoc.type}\nWhen: ${dateInfo}\nSpace: ${raidDoc.characters.length}\`\`\`\n`);
+                }
+            }
+        });
+        if (date && dateStrings.length > 0) {
+            dateStrings.unshift(`Showing raids on ${date}:\n`);
+        }
+
+        return dateStrings.join("") || "No raids found.";
+    };
+
+    static storeLocalData = (type: "raid-types" | "classes", parsed: ClassContent | RaidContent) => {
+        const data = JSON.stringify(parsed);
+        let filePath = "";
+
+        if (type === "raid-types") {
+            filePath = Raid.pathToRaidFile;
+        } else if (type === "classes") {
+            filePath = Raid.pathToClassFile;
+        } else {
+            throw new Error("storeLocalData: requires type to be raid-types or classes");
+        }
+        fs.writeFileSync(filePath, data);
+    };
+
+    static parseData = async (type: "raid-types" | "classes") => {
+        let filePath = "";
+
+        if (type === "raid-types") {
+            filePath = Raid.pathToRaidFile;
+        } else if (type === "classes") {
+            filePath = Raid.pathToClassFile;
+        } else {
+            throw new Error("storeLocalData: requires type to be raid-types or classes");
+        }
+
+        let parsed: RaidJSON | ClassJSON = JSON.parse(fs.readFileSync(filePath, "utf-8") || JSON.stringify({}));
+        const docs = await Raid.get(type);
+
+        if (type === "raid-types") {
+            docs.forEach((doc) => {
+                const data = doc.data();
+                parsed[data.name] = {
+                    id: doc.id,
+                    ilevel: data.ilevel,
+                    memberLimit: data.memberLimit,
+                };
+            });
+            this.menus["raid"] = Raid.generateMenu(Object.keys(parsed));
+        } else if (type === "classes") {
+            docs.forEach((doc) => {
+                const data = doc.data();
+                parsed[data.name] = {
+                    id: doc.id,
+                    firstEngraving: data.firstEngraving,
+                    secondEngraving: data.secondEngraving,
+                    synergy: data.synergy,
+                    type: data.type,
+                };
+            });
+        } else {
+            throw new Error("parsedData: type needs to be 'raid-types' or 'classes'");
+        }
+        return parsed;
     };
 }

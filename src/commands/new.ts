@@ -66,27 +66,27 @@ export const command = {
             const { name } = interaction.options.data[0];
 
             if (name === "raid") {
-                const [name, ilevel, limit] = interaction.options.data[0].options[0].options;
+                const [{ value: name }, { value: ilevel }, { value: memberLimit }] = interaction.options.data[0].options[0].options;
                 // add this information into DB
                 if (fileExists(Raid.pathToRaidFile)) {
                     // check if we have that raid by checking against the name
                     /* data structure:
                  * {
-                  name: {
+                    name: {
                     id,
                     ilevel,
                     memberLimit
-                  }
+                    }
                 }
                  */
                     const parsedRaid = JSON.parse(fs.readFileSync(Raid.pathToRaidFile, "utf-8"));
-                    const duplicated = Object.keys(parsedRaid).filter((key: string) => key.toLowerCase() === (name.value as string).toLowerCase()).length;
+                    const duplicated = Object.keys(parsedRaid).filter((key: string) => key.toLowerCase() === (name as string).toLowerCase()).length;
                     if (!duplicated) {
                         // means we should add to db and add to raid.json
                         const raidOptions: RaidContent = {
-                            name: name.value as string,
-                            ilevel: ilevel.value as number,
-                            memberLimit: limit.value as number,
+                            name: name as string,
+                            ilevel: ilevel as number,
+                            memberLimit: memberLimit as number,
                         };
 
                         const raidDoc = await Raid.addRaidContent(raidOptions);
@@ -143,8 +143,6 @@ export const command = {
                         type: data.type,
                     };
                     // Write to a local file and only write to it when new stuff gets added
-                    console.log(data);
-                    console.log(parsed[data.name]);
 
                     fs.writeFileSync(Raid.pathToClassFile, JSON.stringify(parsed));
 
@@ -163,7 +161,7 @@ export const command = {
 
             try {
                 await interaction.reply({
-                    content: "Unauthorized",
+                    content: "You're not authorized to add new content.",
                     ephemeral: true,
                 });
             } catch (e) {
