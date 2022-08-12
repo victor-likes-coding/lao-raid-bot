@@ -65,10 +65,10 @@ class Bot {
     }
 
     async start() {
+        await Raid.setup();
         await this.setCommands();
         await this.setEvents();
         await this.updateCommands(config.guildId);
-        await Raid.setup();
     }
 
     async updateCommands(guild_id: string) {
