@@ -1,9 +1,10 @@
 import fs from "fs";
-import path from "path";
 import moment from "moment";
 import { CacheType, CommandInteractionOption } from "discord.js";
 import { addDoc, collection, doc, DocumentData, getDoc, getDocs, QuerySnapshot } from "firebase/firestore";
 import { fileExists } from "../utils/file";
+import { Base } from "./Base";
+import { ClassContent, ClassJSON } from "./Class";
 import { db } from "../utils/client";
 
 const times: string[] = [];
@@ -18,15 +19,7 @@ export type RaidType = {
     time?: number;
     characters?: [];
     active?: boolean;
-};
-
-export type ClassType = {
-    // This is for DB
-    name?: string;
-    firstEngraving?: string;
-    secondEngraving?: string;
-    synergy?: string;
-    type?: string;
+    table: string;
 };
 
 export type RaidContent = {
@@ -36,29 +29,11 @@ export type RaidContent = {
     memberLimit?: number;
 };
 
-export type ClassContent = {
-    name?: string;
-    id?: string;
-    firstEngraving?: string;
-    secondEngraving?: string;
-    synergy?: string;
-    type?: "DPS" | "Support";
-};
-
 export type RaidJSON = {
     [name: string]: {
         id: string;
         ilevel: number;
         memberLimit: number;
-    };
-};
-export type ClassJSON = {
-    [name: string]: {
-        id?: string;
-        firstEngraving?: string;
-        secondEngraving?: string;
-        synergy?: string;
-        type?: "DPS" | "Support";
     };
 };
 
@@ -71,19 +46,9 @@ type Menu = {
     [key: string]: MenuItem[];
 };
 
-type RaidConfiguration = {
-    [key: string]: {
-        date?: string;
-        time?: number;
-        raid?: number;
-    };
-};
-
-export class Raid {
+export class Raid extends Base<RaidType, RaidContent, RaidJSON> {
     // tag should be a discord tag
     static menus: Menu = {};
-    static pathToRaidFile = path.join(__dirname, "..", "data", "raid.json");
-    static pathToClassFile = path.join(__dirname, "..", "data", "class.json");
 
     static generateMenu = (list: string[]): MenuItem[] => {
         return list.reduce((prev, current, index: number) => {
@@ -96,6 +61,7 @@ export class Raid {
 
     static setup = async () => {
         // sets up the menus of the raid object
+
         await Raid.loadData("raid-types");
         await Raid.loadData("classes");
 
@@ -108,9 +74,9 @@ export class Raid {
         let filePath = "";
 
         if (type === "raid-types") {
-            filePath = Raid.pathToRaidFile;
+            filePath = Raid.raidFilePath;
         } else if (type === "classes") {
-            filePath = Raid.pathToClassFile;
+            filePath = Raid.classFilePath;
         } else {
             throw new Error("storeLocalData: requires type to be raid-types or classes");
         }
@@ -126,25 +92,6 @@ export class Raid {
     };
 
     // DB functions
-    static add = async (raid: RaidType) => {
-        /**
-         * @raid is an object
-         * {
-         *      date: string
-         *      type: number
-         *      time: string
-         *      characters: [Character.id]
-         *      active: boolean
-         * }
-         */
-        try {
-            // ! check for those requirements
-            const docRef = await addDoc(collection(db, "raids"), raid);
-            console.log("Document written with ID: ", docRef.id);
-        } catch (e) {
-            console.error("Error adding document: ", e);
-        }
-    };
 
     static get = async (table: string): Promise<QuerySnapshot<DocumentData>> => {
         try {
@@ -175,10 +122,6 @@ export class Raid {
         return await addDoc(collection(db, "raid-types"), options);
     };
 
-    static addClassContent = async (options: ClassContent) => {
-        return await addDoc(collection(db, "classes"), options);
-    };
-
     static createRaidObject = (data: readonly CommandInteractionOption<CacheType>[]): RaidType => {
         const [{ value: raidValue }, { value: dateValue }, { value: timeValue }] = data;
 
@@ -194,6 +137,7 @@ export class Raid {
             type: raid,
             characters: [],
             active: true,
+            table: "raids",
         };
     };
 
@@ -239,9 +183,9 @@ export class Raid {
         let filePath = "";
 
         if (type === "raid-types") {
-            filePath = Raid.pathToRaidFile;
+            filePath = Raid.raidFilePath;
         } else if (type === "classes") {
-            filePath = Raid.pathToClassFile;
+            filePath = Raid.classFilePath;
         } else {
             throw new Error("storeLocalData: requires type to be raid-types or classes");
         }
@@ -252,9 +196,9 @@ export class Raid {
         let filePath = "";
 
         if (type === "raid-types") {
-            filePath = Raid.pathToRaidFile;
+            filePath = Raid.raidFilePath;
         } else if (type === "classes") {
-            filePath = Raid.pathToClassFile;
+            filePath = Raid.classFilePath;
         } else {
             throw new Error("storeLocalData: requires type to be raid-types or classes");
         }
