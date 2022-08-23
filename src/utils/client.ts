@@ -4,7 +4,6 @@ import { read } from "./file";
 import { REST } from "@discordjs/rest";
 import { config } from "../../config";
 import { Raid } from "../model/Raid";
-import path from "path";
 
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
@@ -23,7 +22,7 @@ const options = {
     intents: [GatewayIntentBits.Guilds],
 };
 
-class Bot {
+export class Bot {
     client = new SuperClient(options);
 
     // Theory: use relative path of the start of the bot call which is in /index.ts
