@@ -107,6 +107,8 @@ type Menu = {
 export class Raid extends Base<RaidType, RaidContent, RaidJSON> {
     // tag should be a discord tag
     static menus: Menu = {};
+    static raidTypes: RaidJSON = {};
+    static engravings: Menu = {};
 
     static generateMenu = (list: string[]): MenuItem[] => {
         return list.reduce((prev, current, index: number) => {
