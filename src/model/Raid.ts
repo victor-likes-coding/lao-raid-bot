@@ -241,12 +241,20 @@ export class Raid extends Base<RaidType, RaidContent, RaidJSON> {
                 const raidDate = moment(raidDoc.time).format("dddd");
                 if (raidDate === date) {
                     const dateInfo = moment(raidDoc.time).format("MM/DD dddd @ HH:mm ZZ");
-                    dateStrings.push(`\`\`\`${index++}. ${raidDoc.type}\nWhen: ${dateInfo}\nSpace: ${raidDoc.characters.length}\`\`\`\n`);
+                    dateStrings.push(
+                        `\`\`\`${index++}. ${raidDoc.type}\nWhen: ${dateInfo}\nSpace: ${raidDoc.characters.length} / ${
+                            Raid.raidTypes[raidDoc.type].memberLimit
+                        }\`\`\`\n`
+                    );
                 }
             } else {
                 if (raidDoc.time > Date.now()) {
                     const dateInfo = moment(raidDoc.time).format("MM/DD dddd @ HH:mm ZZ");
-                    dateStrings.push(`\`\`\`${index++}. ${raidDoc.type}\nWhen: ${dateInfo}\nSpace: ${raidDoc.characters.length}\`\`\`\n`);
+                    dateStrings.push(
+                        `\`\`\`${index++}. ${raidDoc.type}\nWhen: ${dateInfo}\nSpace: ${raidDoc.characters.length} / ${
+                            Raid.raidTypes[raidDoc.type].memberLimit
+                        }\`\`\`\n`
+                    );
                 }
             }
         });
