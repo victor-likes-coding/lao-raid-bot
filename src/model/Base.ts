@@ -13,12 +13,14 @@ export class Base<C, T, J> {
     static async add<T extends GenericType>(options: T) {
         const { table, ...rest } = options;
         try {
-            const docRef = await addDoc(collection(db, table), rest);
-            console.log("Document written with ID: ", docRef.id);
+            const doc = await addDoc(collection(db, table), rest);
+            return doc;
         } catch (e) {
             console.error("Error adding document: ", e);
         }
     }
 
     static getLocalData(type: string) {}
+
+    static setUp() {}
 }
