@@ -1,6 +1,3 @@
-import { Raid, RaidType } from "../model/Raid";
-import moment from "moment";
-
 export const event = {
     name: "interactionCreate",
     async execute(interaction: any) {
