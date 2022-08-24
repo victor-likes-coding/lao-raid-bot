@@ -149,6 +149,25 @@ export class Raid extends Base<RaidType, RaidContent, RaidJSON> {
         const parsed = await Raid.parseData(type);
 
         Raid.storeLocalData(type, parsed);
+        if (type === "raid-types") Raid.raidTypes = parsed as RaidJSON;
+        // if (type === "classes") {
+        //     const engravings: Menu = {};
+        //     for (const className in parsed as ClassJSON) {
+        //         const { firstEngraving, secondEngraving } = (parsed as ClassJSON)[className];
+        //         engravings[className] = [
+        //             {
+        //                 name: firstEngraving,
+        //                 value: firstEngraving,
+        //             },
+        //             {
+        //                 name: secondEngraving,
+        //                 value: secondEngraving,
+        //             },
+        //         ];
+        //     }
+
+        //     Raid.engravings = engravings;
+        // }
     };
 
     // DB functions
