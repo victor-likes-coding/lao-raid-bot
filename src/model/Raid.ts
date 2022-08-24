@@ -26,6 +26,7 @@ const classType = {
     Berserker: "Warrior",
     Gunlancer: "Warrior",
     Destroyer: "Warrior",
+};
 const times: string[] = [];
 
 for (let i = 0; i < 24; i++) {
@@ -225,9 +226,6 @@ export class Raid extends Base<RaidType, RaidContent, RaidJSON> {
         let index = 1;
         let dateStrings: string[] = [];
 
-        // if (date) {
-        //     message += `Showing raids on ${date}:\n`;
-        // }
         raids.forEach((doc) => {
             // doc.data() is never undefined for query doc snapshots
             // Only grab docs where the time > now
