@@ -110,7 +110,7 @@ export class Raid extends Base<RaidType, RaidContent, RaidJSON> {
     static raidTypes: RaidJSON = {};
     static engravings: Menu = {};
 
-    static generateMenu = (list: string[]): MenuItem[] => {
+    static generateMenu = (list: string[]): Item[] => {
         return list.reduce((prev, current, index: number) => {
             return prev.concat({
                 name: current,
