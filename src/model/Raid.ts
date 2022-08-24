@@ -95,13 +95,13 @@ export type RaidJSON = {
     };
 };
 
-type MenuItem = {
+type Item = {
     name: string;
     value: string;
 };
 
 type Menu = {
-    [key: string]: MenuItem[];
+    [key: string]: Item[];
 };
 
 export class Raid extends Base<RaidType, RaidContent, RaidJSON> {
