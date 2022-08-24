@@ -32,8 +32,8 @@ export const command = {
     async execute(interaction: CommandInteraction) {
         // create a Raid
         try {
-            const newRaid = await Raid.add(Raid.createRaidObject(interaction.options.data));
             // add this information into DB
+            const newRaid = await Raid.add(Raid.createRaidObject(interaction.options.data));
             return await interaction.reply({ content: "Raid added, please use `/raids` to view a list of upcoming raids", ephemeral: true });
         } catch (e) {
             return await interaction.reply({ content: "Something went wrong adding a hosted raid", ephemeral: true });
