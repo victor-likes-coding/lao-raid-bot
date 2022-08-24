@@ -7,6 +7,25 @@ import { Base } from "./Base";
 import { ClassContent, ClassJSON } from "./Class";
 import { db } from "../utils/client";
 
+const classType = {
+    Deathblade: "Assassin",
+    Shadowhunter: "Assassin",
+    Sorceress: "Mage",
+    Bard: "Mage",
+    Arcanist: "Mage",
+    Deadeye: "Gunner",
+    Sharpshooter: "Gunner",
+    Gunslinger: "Gunner",
+    Artillerist: "Gunner",
+    Glaivier: "Martial Artist",
+    Scrapper: "Martial Artist",
+    Soulfist: "Martial Artist",
+    Wardancer: "Martial Artist",
+    Striker: "Martial Artist",
+    Paladin: "Warrior",
+    Berserker: "Warrior",
+    Gunlancer: "Warrior",
+    Destroyer: "Warrior",
 const times: string[] = [];
 
 for (let i = 0; i < 24; i++) {
@@ -21,6 +40,45 @@ export type RaidType = {
     active?: boolean;
     table: string;
 };
+
+export type SpecificEngravings = {
+    Assassin?: {
+        [key: string]: Item[];
+    };
+    Mage?: {
+        [key: string]: Item[];
+    };
+    Gunner?: {
+        [key: string]: Item[];
+    };
+    "Martial Artist"?: {
+        [key: string]: Item[];
+    };
+    Warrior?: {
+        [key: string]: Item[];
+    };
+};
+
+export type CharacterClasses = "Assassin" | "Mage" | "Gunner" | "Martial Artist" | "Warrior";
+export type Characters =
+    | "Deathblade"
+    | "Shadowhunter"
+    | "Sorceress"
+    | "Bard"
+    | "Arcanist"
+    | "Deadeye"
+    | "Sharpshooter"
+    | "Gunslinger"
+    | "Artillerist"
+    | "Glaivier"
+    | "Scrapper"
+    | "Soulfist"
+    | "Wardancer"
+    | "Striker"
+    | "Paladin"
+    | "Berserker"
+    | "Gunlancer"
+    | "Destroyer";
 
 export type RaidContent = {
     name?: string;
