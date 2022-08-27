@@ -29,7 +29,7 @@ export const command = {
         // get the class, engraving, item level
         const [characterData, ...rest] = interaction.options.data;
         try {
-            let isDuplicateCharacter = await Character.isDuplicate(characterData.value as string);
+            let isDuplicateCharacter = await Character.exists(characterData.value as string);
             if (isDuplicateCharacter) {
                 return await interaction.reply({ content: "This character's name exists already.", ephemeral: true });
             }

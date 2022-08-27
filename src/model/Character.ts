@@ -21,7 +21,7 @@ export class Character extends Base<CharacterType, CharacterContent, CharacterJS
     static table = "characters";
     classes: LostArkClasses = {};
 
-    static async isDuplicate(name: string) {
+    static async exists(name: string) {
         const ref = query(collection(db, this.table), where("name", "==", name));
         const docs = await getDocs(ref);
         docs.forEach((character) => {
