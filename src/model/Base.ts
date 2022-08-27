@@ -1,5 +1,7 @@
-import { addDoc, collection } from "firebase/firestore";
+import fs from "fs";
+import { addDoc, collection, doc, getDoc, getDocsFromServer } from "firebase/firestore";
 import path from "path";
+import { fileExists } from "../utils/file";
 import { db } from "../utils/client";
 
 export type GenericType = {
@@ -7,20 +9,68 @@ export type GenericType = {
 };
 
 export class Base<C, T, J> {
-    static raidFilePath = path.join(__dirname, "..", "data", "raid.json");
-    static classFilePath = path.join(__dirname, "..", "data", "class.json");
+    static table = "";
+    static filePath = "";
 
-    static async add<T extends GenericType>(options: T) {
-        const { table, ...rest } = options;
+    // db functions below
+
+    static async add<C>(options: C) {
         try {
-            const doc = await addDoc(collection(db, table), rest);
+            const doc = await addDoc(collection(db, this.table), options);
             return doc;
         } catch (e) {
             console.error("Error adding document: ", e);
         }
     }
 
-    static getLocalData(type: string) {}
+    /*
+     * gets the collection of documents for this table
+     */
+    static async get() {
+        try {
+            return await getDocsFromServer(collection(db, this.table));
+        } catch (e) {
+            throw Error(`Problem with getting docs from server, ${e.message}`);
+        }
+    }
 
-    static setUp() {}
+    static async getById(id: string) {
+        const raidRef = doc(db, this.table, id);
+        try {
+            const docs = await getDoc(raidRef);
+            return {
+                id: docs.id,
+                ...docs.data(),
+            };
+        } catch (e) {
+            console.log("Something went wrong with getting a raid by ID");
+            return new Promise((res) => {
+                res({});
+            });
+        }
+    }
+
+    // db fns end
+
+    // creates a json file for the filepath if it doesn't exist
+    static async createJSONFile() {
+        if (!fileExists(this.filePath)) {
+            const data = JSON.stringify({});
+            fs.writeFileSync(this.filePath, data);
+        }
+    }
+
+    static storeLocalData<C>(parsed: C) {
+        const data = JSON.stringify(parsed);
+        fs.writeFileSync(this.filePath, data);
+    }
+
+    static async getData<J>() {
+        let parsed: J = JSON.parse(fs.readFileSync(this.filePath, "utf-8") || JSON.stringify({}));
+        try {
+            return this.get();
+        } catch (e) {
+            throw Error(`Can't get data to be parsed in load operation.`);
+        }
+    }
 }
