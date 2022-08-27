@@ -5,7 +5,7 @@ import { sha256 } from "js-sha256";
 import { fileExists } from "../utils/file";
 import { config } from "../../config";
 import { db } from "../utils/client";
-import { Raid, RaidContent } from "../model/Raid";
+import { Raid, RaidContent, RaidJSON } from "../model/Raid";
 import { Class, ClassContent } from "../model/Class";
 
 export const command = {
@@ -69,7 +69,7 @@ export const command = {
             if (name === "raid") {
                 const [{ value: name }, { value: ilevel }, { value: memberLimit }] = interaction.options.data[0].options[0].options;
                 // add this information into DB
-                if (fileExists(Raid.raidFilePath)) {
+                if (fileExists(Raid.filePath)) {
                     // check if we have that raid by checking against the name
                     /* data structure:
                  * {
@@ -80,7 +80,7 @@ export const command = {
                     }
                 }
                  */
-                    const parsedRaid = JSON.parse(fs.readFileSync(Raid.raidFilePath, "utf-8"));
+                    const parsedRaid = JSON.parse(fs.readFileSync(Raid.filePath, "utf-8"));
                     const duplicated = Object.keys(parsedRaid).filter((key: string) => key.toLowerCase() === (name as string).toLowerCase()).length;
                     if (!duplicated) {
                         // means we should add to db and add to raid.json
@@ -90,7 +90,7 @@ export const command = {
                             memberLimit: memberLimit as number,
                         };
 
-                        const raidDoc = await Raid.addRaidContent(raidOptions);
+                        const raidDoc = await Raid.add(raidOptions);
                         const data = (await getDoc(raidDoc)).data();
                         // when we get it back, we need to structure it like the above
 
@@ -101,7 +101,7 @@ export const command = {
                         };
                         // Write to a local file and only write to it when new stuff gets added
 
-                        fs.writeFileSync(Raid.raidFilePath, JSON.stringify(parsedRaid));
+                        fs.writeFileSync(Raid.filePath, JSON.stringify(parsedRaid));
 
                         try {
                             return await interaction.reply({ content: "Raid type added!", ephemeral: true });
@@ -121,7 +121,7 @@ export const command = {
             if (name === "class") {
                 const [name, firstEngraving, secondEngraving, synergy, type] = interaction.options.data[0].options[0].options;
 
-                const parsed = JSON.parse(fs.readFileSync(Class.classFilePath, "utf-8"));
+                const parsed = JSON.parse(fs.readFileSync(Class.filePath, "utf-8"));
                 const duplicated = Object.keys(parsed).filter((key: string) => key.toLowerCase() === (name.value as string).toLowerCase()).length;
                 if (!duplicated) {
                     // means we should add to db and add to class.json
@@ -133,7 +133,7 @@ export const command = {
                         type: ["Support", "DPS"][type.value as number] as "Support" | "DPS",
                     };
 
-                    const doc = await Class.addClassContent(classOptions);
+                    const doc = await Class.add(classOptions);
                     const data = (await getDoc(doc)).data();
 
                     parsed[data.name] = {
@@ -145,7 +145,7 @@ export const command = {
                     };
                     // Write to a local file and only write to it when new stuff gets added
 
-                    fs.writeFileSync(Class.classFilePath, JSON.stringify(parsed));
+                    fs.writeFileSync(Class.filePath, JSON.stringify(parsed));
 
                     try {
                         return await interaction.reply({ content: "Class type added!", ephemeral: true });
