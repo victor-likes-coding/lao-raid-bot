@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, CommandInteraction } from "discord.js";
-import { addDoc, collection, doc, DocumentData, DocumentReference, getDoc, getDocs, query, setDoc, where } from "firebase/firestore";
+import { addDoc, collection, doc, DocumentData, DocumentReference, getDocs, query, QueryDocumentSnapshot, setDoc, where } from "firebase/firestore";
 import { db } from "../utils/client";
 import { Raid } from "../model/Raid";
 import { User } from "../model/User";
@@ -41,10 +41,10 @@ export const command = {
         const { id } = interaction.user;
         try {
             let document = await User.getByDiscordId(id);
-            const user = document.data();
 
             // handle checking if user exists
             const firebaseDoc = await User.exists(document, id);
+            const user = (firebaseDoc as QueryDocumentSnapshot<DocumentData>).data();
 
             const classesRef = query(collection(db, "classes"), where("name", "==", classData.value));
             let characterClassId = null;
