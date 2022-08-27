@@ -1,7 +1,9 @@
 import { SlashCommandBuilder, CommandInteraction } from "discord.js";
-import { addDoc, collection, doc, getDoc, getDocs, query, setDoc, where } from "firebase/firestore";
+import { addDoc, collection, doc, DocumentData, DocumentReference, getDoc, getDocs, query, setDoc, where } from "firebase/firestore";
 import { db } from "../utils/client";
 import { Raid } from "../model/Raid";
+import { User } from "../model/User";
+import { Character } from "../model/Character";
 
 const data = new SlashCommandBuilder()
     .setName("add")
@@ -26,92 +28,65 @@ export const command = {
     async execute(interaction: CommandInteraction) {
         // get the class, engraving, item level
         const [characterData, ...rest] = interaction.options.data;
-        let isDuplicateCharacter = false;
-
-        const charactersRef = query(collection(db, "characters"), where("name", "==", characterData.value));
-
         try {
-            const characters = await getDocs(charactersRef);
-            characters.forEach((character) => {
-                if (character.data().name === characterData.value) {
-                    isDuplicateCharacter = true;
-                }
-            });
+            let isDuplicateCharacter = await Character.isDuplicate(characterData.value as string);
+            if (isDuplicateCharacter) {
+                return await interaction.reply({ content: "This character's name exists already.", ephemeral: true });
+            }
         } catch (e) {
             return await interaction.reply({ content: "Something went wrong getting characters", ephemeral: true });
         }
 
-        if (isDuplicateCharacter) {
-            return await interaction.reply({ content: "This character's name exists already.", ephemeral: true });
-        }
-
         const [classData, ilevelData] = rest;
-        let user = null;
-        let firebaseUser = null;
         const { id } = interaction.user;
-
-        const usersRef = query(collection(db, "users"), where("discord_user", "==", id));
-        const classesRef = query(collection(db, "classes"), where("name", "==", classData.value));
-
         try {
-            const users = await getDocs(usersRef);
-            users.forEach((doc) => {
-                if (doc.data().discord_user === id) {
-                    user = doc.data();
-                    firebaseUser = doc;
-                }
-            });
-            // get discord user's id
+            let document = await User.getByDiscordId(id);
+            const user = document.data();
+
+            // handle checking if user exists
+            const firebaseDoc = await User.exists(document, id);
+
+            const classesRef = query(collection(db, "classes"), where("name", "==", classData.value));
+            let characterClassId = null;
+
+            // get the class id
+            try {
+                const classes = await getDocs(classesRef);
+
+                classes.forEach((doc) => {
+                    if (doc.data().name === classData.value) {
+                        characterClassId = doc.id;
+                    }
+                });
+            } catch (e) {
+                return await interaction.reply({ content: "Something went wrong getting classes", ephemeral: true });
+            }
+
+            // create the character
+            let character: {
+                class: string;
+                name: string;
+                owner: string;
+                ilvl: number;
+                user: string;
+            } = {
+                class: characterClassId,
+                owner: id, // discord id
+                name: characterData.value as string,
+                ilvl: Number.parseInt(ilevelData.value as string),
+                user: firebaseDoc.id, // should be document id
+            };
+
+            try {
+                const newCharacterId = await addDoc(collection(db, "characters"), character);
+                user.characters.push(newCharacterId);
+                await setDoc(doc(db, "users", firebaseDoc.id), user);
+                return await interaction.reply({ content: "New class added to your account", ephemeral: true });
+            } catch (e) {
+                return await interaction.reply({ content: "Something went adding a new character to your user account", ephemeral: true });
+            }
         } catch (e) {
             return await interaction.reply({ content: "Something went wrong getting users", ephemeral: true });
-        }
-
-        // if user doesn't exist
-        if (!user) {
-            //     // create user model and update var
-            user = {
-                discord_user: id,
-                characters: [],
-            };
-            // make the user/add user to db
-            firebaseUser = await addDoc(collection(db, "users"), user);
-        }
-
-        let characterClassId = null;
-
-        // get the class id
-        try {
-            const classes = await getDocs(classesRef);
-
-            classes.forEach((doc) => {
-                if (doc.data().name === classData.value) {
-                    characterClassId = doc.id;
-                }
-            });
-        } catch (e) {
-            return await interaction.reply({ content: "Something went wrong getting classes", ephemeral: true });
-        }
-
-        // create the character
-        let character: {
-            class: string;
-            name: string;
-            owner: string;
-            ilvl: number;
-        } = {
-            class: characterClassId,
-            owner: id,
-            name: characterData.value as string,
-            ilvl: Number.parseInt(ilevelData.value as string),
-        };
-
-        try {
-            const newCharacterId = await addDoc(collection(db, "characters"), character);
-            user.characters.push(newCharacterId);
-            await setDoc(doc(db, "users", firebaseUser.id), user);
-            return await interaction.reply({ content: "New class added to your account", ephemeral: true });
-        } catch (e) {
-            return await interaction.reply({ content: "Something went adding a new character to your user account", ephemeral: true });
         }
     },
 };

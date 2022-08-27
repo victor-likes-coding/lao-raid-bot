@@ -1,3 +1,5 @@
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "../utils/client";
 import { Base } from "./Base";
 
 type LostArkClasses = {
@@ -15,10 +17,18 @@ export type CharacterContent = {};
 
 export type CharacterJSON = {};
 
-class Character extends Base<CharacterType, CharacterContent, CharacterJSON> {
+export class Character extends Base<CharacterType, CharacterContent, CharacterJSON> {
+    static table = "characters";
     classes: LostArkClasses = {};
 
-    static loadEngravings = () => {};
-
-    static setUp = () => {};
+    static async isDuplicate(name: string) {
+        const ref = query(collection(db, this.table), where("name", "==", name));
+        const docs = await getDocs(ref);
+        docs.forEach((character) => {
+            if (character.data().name === name) {
+                return true;
+            }
+        });
+        return false;
+    }
 }
