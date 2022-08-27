@@ -8,6 +8,7 @@ import { Raid } from "../model/Raid";
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { config as firebaseConfig } from "../../firebase.config";
+import { Class } from "../model/Class";
 
 // TODO: Replace the following with your app's Firebase project configuration
 // See: https://firebase.google.com/docs/web/learn-more#config-object
@@ -65,6 +66,7 @@ export class Bot {
 
     async start() {
         await Raid.setup();
+        await Class.setup();
         await this.setCommands();
         await this.setEvents();
         await this.updateCommands(config.guildId);
