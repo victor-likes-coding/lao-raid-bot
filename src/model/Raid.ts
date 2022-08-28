@@ -1,7 +1,7 @@
 import fs from "fs";
 import moment from "moment";
-import { CacheType, CommandInteractionOption } from "discord.js";
-import { addDoc, collection, doc, DocumentData, getDoc, getDocs, QuerySnapshot } from "firebase/firestore";
+import { ActionRowBuilder, CacheType, CommandInteractionOption, SelectMenuBuilder } from "discord.js";
+import { addDoc, collection, doc, DocumentData, getDoc, getDocs, getDocsFromServer, QuerySnapshot } from "firebase/firestore";
 import { Base } from "./Base";
 import { db } from "../utils/client";
 import path from "path";
@@ -86,12 +86,25 @@ export type RaidContent = {
     memberLimit?: number;
 };
 
+type option = {
+    label: string;
+    description: string;
+    value: number;
+};
+
 export type RaidJSON = {
     [name: string]: {
         id: string;
         ilevel: number;
         memberLimit: number;
     };
+};
+
+export type RaidModel = {
+    id?: string;
+    characters?: string[];
+    time?: number;
+    type?: string; // can be used to look up raid-type information
 };
 
 type Item = {
@@ -133,12 +146,43 @@ export class Raid extends Base<RaidType, RaidContent, RaidJSON> {
         try {
             return await getDoc(raidRef);
         } catch (e) {
-            console.log("Something went wrong with getting a raid by ID");
             return new Promise((res) => {
                 res([]);
             });
         }
     };
+
+    static async getByDate(date?: string) {
+        // get start of day
+        const raids: RaidModel[] = [];
+        const ref = await getDocsFromServer(collection(db, this.table));
+
+        ref.forEach((doc) => {
+            const data = doc.data();
+            if (date) {
+                if (data.time > Date.now()) {
+                    const raidDate = moment(data.time).format("dddd");
+                    if (raidDate === date) {
+                        raids.push({
+                            id: doc.id,
+                            ...data,
+                        });
+                    }
+                } else {
+                    if (data.time > Date.now()) {
+                        raids.push({
+                            id: doc.id,
+                            ...doc.data(),
+                        });
+                    }
+                }
+            }
+        });
+
+        // get all raids within start / end
+
+        return raids;
+    }
 
     // End DB functions
 
@@ -228,5 +272,19 @@ export class Raid extends Base<RaidType, RaidContent, RaidJSON> {
         const parsed = await this.parseData(docs);
         this.storeLocalData(parsed);
         this.raidTypes = parsed;
+    }
+
+    static createSelectMenu(data: RaidModel[]): ActionRowBuilder<SelectMenuBuilder> {
+        const options = data.map((raid, index) => {
+            return {
+                label: `${raid.type} @ ${moment(raid.time).format("MM/DD dddd @ HH:mm ZZ")}`,
+                description: `${raid.characters.length} / ${this.raidTypes[raid.type].memberLimit} members`,
+                value: raid.id,
+            };
+        });
+        const menu = new ActionRowBuilder<SelectMenuBuilder>().setComponents(
+            new SelectMenuBuilder().setCustomId("raid").setPlaceholder("Choose a raid").setOptions(options)
+        );
+        return menu;
     }
 }
