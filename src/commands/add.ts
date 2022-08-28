@@ -3,7 +3,8 @@ import { addDoc, collection, doc, DocumentData, DocumentReference, getDocs, quer
 import { db } from "../utils/client";
 import { Raid } from "../model/Raid";
 import { User } from "../model/User";
-import { Character } from "../model/Character";
+import { Character, CharacterModel } from "../model/Character";
+import { Class } from "../model/Class";
 
 const data = new SlashCommandBuilder()
     .setName("add")
@@ -15,7 +16,7 @@ const data = new SlashCommandBuilder()
             .setDescription("Choose a class from list provided")
             .setRequired(true)
             .addChoices(
-                ...Object.keys(Raid.engravings).map((className) => ({
+                ...Object.keys(Class.engravings).map((className) => ({
                     name: className,
                     value: className,
                 }))
@@ -41,35 +42,23 @@ export const command = {
         const { id } = interaction.user;
         try {
             let document = await User.getByDiscordId(id);
+            let user = null;
 
             // handle checking if user exists
             const firebaseDoc = await User.exists(document, id);
-            const user = (firebaseDoc as QueryDocumentSnapshot<DocumentData>).data();
-
-            const classesRef = query(collection(db, "classes"), where("name", "==", classData.value));
+            if ("data" in firebaseDoc) {
+                user = (firebaseDoc as QueryDocumentSnapshot<DocumentData>).data();
+            }
             let characterClassId = null;
 
-            // get the class id
             try {
-                const classes = await getDocs(classesRef);
-
-                classes.forEach((doc) => {
-                    if (doc.data().name === classData.value) {
-                        characterClassId = doc.id;
-                    }
-                });
+                characterClassId = await Class.getClass(classData.value as string);
             } catch (e) {
                 return await interaction.reply({ content: "Something went wrong getting classes", ephemeral: true });
             }
 
             // create the character
-            let character: {
-                class: string;
-                name: string;
-                owner: string;
-                ilvl: number;
-                user: string;
-            } = {
+            let character: CharacterModel = {
                 class: characterClassId,
                 owner: id, // discord id
                 name: characterData.value as string,
@@ -78,12 +67,11 @@ export const command = {
             };
 
             try {
-                const newCharacterId = await addDoc(collection(db, "characters"), character);
-                user.characters.push(newCharacterId);
-                await setDoc(doc(db, "users", firebaseDoc.id), user);
+                const newCharacter = await Character.add(character);
                 await User.addCharacter(user, newCharacter.id, firebaseDoc.id);
                 return await interaction.reply({ content: "New class added to your account", ephemeral: true });
             } catch (e) {
+                console.log(e);
                 return await interaction.reply({ content: "Something went adding a new character to your user account", ephemeral: true });
             }
         } catch (e) {

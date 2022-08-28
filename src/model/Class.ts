@@ -1,8 +1,9 @@
 import fs from "fs";
-import { addDoc, collection, DocumentData, QuerySnapshot } from "firebase/firestore";
+import { collection, DocumentData, getDocs, query, QuerySnapshot, where } from "firebase/firestore";
 import path from "path";
 import { db } from "../utils/client";
 import { Base } from "./Base";
+import { Menu } from "./Raid";
 
 export type ClassType = {
     // This is for DB
@@ -36,6 +37,7 @@ export type ClassJSON = {
 export class Class extends Base<ClassContent, ClassType, ClassJSON> {
     static table = "classes";
     static filePath = path.join(__dirname, "..", "data", "class.json");
+    static engravings: ClassJSON = {};
 
     static setup = async () => {
         await this.load();
@@ -64,5 +66,27 @@ export class Class extends Base<ClassContent, ClassType, ClassJSON> {
         const docs = await this.getData();
         const parsed = await this.parseData(docs);
         this.storeLocalData(parsed);
+        this.engravings = parsed;
+    }
+
+    static async getClass(data: string): Promise<string> {
+        let characterClassId = null;
+        const ref = query(collection(db, this.table), where("name", "==", data));
+        try {
+            const docs = await getDocs(ref);
+            docs.forEach((doc) => {
+                if (doc.data().name === data) {
+                    characterClassId = doc.id;
+                }
+            });
+
+            if (!characterClassId) {
+                Promise.reject("Could not find that class");
+            }
+
+            return characterClassId || "";
+        } catch (e) {
+            throw Error(`Could not find a class named: ${data}`);
+        }
     }
 }
