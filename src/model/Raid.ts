@@ -142,12 +142,6 @@ export class Raid extends Base<RaidType, RaidContent, RaidJSON> {
 
     // End DB functions
 
-    static addRaidContent = async (options: RaidContent) => {
-        // Check and see if we have that raid already by checking local file
-
-        return await addDoc(collection(db, "raid-types"), options);
-    };
-
     static createRaidObject = (data: readonly CommandInteractionOption<CacheType>[]): RaidType => {
         const [{ value: raidValue }, { value: dateValue }, { value: timeValue }] = data;
 
