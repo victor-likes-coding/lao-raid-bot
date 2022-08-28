@@ -2,11 +2,15 @@ import { addDoc, collection, doc, DocumentData, getDocs, query, QueryDocumentSna
 import { db } from "../utils/client";
 
 type DiscordDataUser = QueryDocumentSnapshot<DocumentData> | null;
+type UserModel = {
+    characters: string[];
+    discord_user: string;
+};
 
 export class User {
     static table = "users";
 
-    static async add<C>(options: C) {
+    static async add(options: UserModel) {
         try {
             const doc = await addDoc(collection(db, this.table), options);
             return doc;
@@ -27,28 +31,34 @@ export class User {
         return document;
     }
 
-    // checks if the doc exists, if it doesn't, user should be added to db
-    static async exists(doc: QueryDocumentSnapshot<DocumentData>, id: string) {
-        if (!doc) {
-            // create user model and update var
-            const data: DocumentData = {
-                discord_user: id,
-                characters: [],
-            };
-            // make the user/add user to db
-            return await User.add(data);
-            // doc should now exist and should be sent back
+    static async getById(id: string) {
+        let document: QueryDocumentSnapshot<DocumentData> = null;
+        try {
+            const ref = await getDocs(collection(db, this.table));
+            ref.forEach((doc) => {
+                if (doc.id === id) {
+                    document = doc;
+                }
+            });
+
+            return document;
+        } catch (e) {
+            throw Error("There was an issue getting a user by their id");
         }
-        // doc already exists, should return that doc
-        return doc;
     }
 
-    static async addCharacter(data: DocumentData, id: string, documentId: string) {
-        data.characters.push(id);
+    // checks if the doc exists
+    // static async exists(doc: QueryDocumentSnapshot<DocumentData>) {
+    //     return !!doc;
+    // }
+
+    static async addCharacter(data: QueryDocumentSnapshot<DocumentData>, characterId: string, userId: string) {
+        const document = data.data();
+        document.characters.push(characterId);
         try {
-            await setDoc(doc(db, this.table, id), data);
+            await setDoc(doc(db, this.table, userId), document);
         } catch (e) {
-            Promise.reject("Could not save user data with new character added");
+            return e;
         }
     }
 }

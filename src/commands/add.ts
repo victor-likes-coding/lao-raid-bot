@@ -42,13 +42,19 @@ export const command = {
         const { id } = interaction.user;
         try {
             let document = await User.getByDiscordId(id);
-            let user = null;
+            let user: QueryDocumentSnapshot<DocumentData> = null;
 
             // handle checking if user exists
-            const firebaseDoc = await User.exists(document, id);
-            if ("data" in firebaseDoc) {
-                user = (firebaseDoc as QueryDocumentSnapshot<DocumentData>).data();
+            if (!!document) {
+                user = document;
+                console.log("document exists!", user);
+            } else {
+                // doesn't exist so it needs to be created
+                const newUser = await User.add({ characters: [], discord_user: id });
+                // Query for that new document
+                user = await User.getById(newUser.id);
             }
+
             let characterClassId = null;
 
             try {
@@ -63,18 +69,19 @@ export const command = {
                 owner: id, // discord id
                 name: characterData.value as string,
                 ilvl: Number.parseInt(ilevelData.value as string),
-                user: firebaseDoc.id, // should be document id
+                user: user.id, // should be document id
             };
 
             try {
                 const newCharacter = await Character.add(character);
-                await User.addCharacter(user, newCharacter.id, firebaseDoc.id);
+                await User.addCharacter(user, newCharacter.id, user.id);
                 return await interaction.reply({ content: "New class added to your account", ephemeral: true });
             } catch (e) {
                 console.log(e);
                 return await interaction.reply({ content: "Something went adding a new character to your user account", ephemeral: true });
             }
         } catch (e) {
+            console.log(e);
             return await interaction.reply({ content: "Something went wrong getting users", ephemeral: true });
         }
     },
