@@ -1,4 +1,3 @@
-import { collection, DocumentData, getDocs, QuerySnapshot } from "firebase/firestore";
 import { SlashCommandBuilder, CommandInteraction } from "discord.js";
 import { Raid } from "../model/Raid";
 
