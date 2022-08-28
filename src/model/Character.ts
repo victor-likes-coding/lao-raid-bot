@@ -41,4 +41,16 @@ export class Character extends Base<CharacterType, CharacterContent, CharacterJS
         });
         return exists;
     }
+
+    static async getByOwnerId(id: string) {
+        const ref = query(collection(db, this.table), where("owner", "==", id));
+        try {
+            const docs = await getDocs(ref);
+            docs.forEach((doc) => {
+                console.log(doc.data());
+            });
+        } catch (e) {
+            throw Error("Someting went wrong getting characters owned by a specific user");
+        }
+    }
 }

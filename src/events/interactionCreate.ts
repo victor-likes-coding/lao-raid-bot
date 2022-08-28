@@ -1,3 +1,6 @@
+import { ChatInputCommandInteraction, CommandInteraction, SelectMenuInteraction } from "discord.js";
+import { Character } from "../model/Character";
+
 export const event = {
     name: "interactionCreate",
     async execute(interaction: any) {
@@ -10,6 +13,8 @@ export const event = {
 
                 // now we need to get a list of the characters they own
                 const { id: userId } = selectMenuInteraction.user;
+                await Character.getByOwnerId(userId);
+
         }
 
         if (interaction.isChatInputCommand()) {
