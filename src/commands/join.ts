@@ -18,7 +18,6 @@ export const command = {
 
             // make select menus
             const selectMenu = Raid.createSelectMenu(raids);
-            console.log(selectMenu.components[0]);
 
             if (selectMenu.components[0].options.length > 0) {
                 try {
