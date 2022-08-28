@@ -14,9 +14,9 @@ export class Base<C, T, J> {
 
     // db functions below
 
-    static async add<C>(options: C) {
+    static async add<C>(options: C, tableName?: string) {
         try {
-            const doc = await addDoc(collection(db, this.table), options);
+            const doc = await addDoc(collection(db, tableName || this.table), options);
             return doc;
         } catch (e) {
             console.error("Error adding document: ", e);
