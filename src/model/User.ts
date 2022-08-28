@@ -1,4 +1,4 @@
-import { addDoc, collection, DocumentData, getDocs, query, QueryDocumentSnapshot, where } from "firebase/firestore";
+import { addDoc, collection, doc, DocumentData, getDocs, query, QueryDocumentSnapshot, setDoc, where } from "firebase/firestore";
 import { db } from "../utils/client";
 
 type DiscordDataUser = QueryDocumentSnapshot<DocumentData> | null;
@@ -27,17 +27,19 @@ export class User {
         return document;
     }
 
+    // checks if the doc exists, if it doesn't, user should be added to db
     static async exists(doc: QueryDocumentSnapshot<DocumentData>, id: string) {
         if (!doc) {
-            //     // create user model and update var
+            // create user model and update var
             const data: DocumentData = {
                 discord_user: id,
                 characters: [],
             };
             // make the user/add user to db
-            const newDoc = await User.add(data);
-            return newDoc;
+            return await User.add(data);
+            // doc should now exist and should be sent back
         }
+        // doc already exists, should return that doc
         return doc;
     }
 
