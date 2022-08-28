@@ -17,6 +17,14 @@ export type CharacterContent = {};
 
 export type CharacterJSON = {};
 
+export type CharacterModel = {
+    class: string;
+    name: string;
+    owner: string;
+    ilvl: number;
+    user: string;
+};
+
 export class Character extends Base<CharacterType, CharacterContent, CharacterJSON> {
     static table = "characters";
     classes: LostArkClasses = {};
