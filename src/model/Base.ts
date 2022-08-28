@@ -26,9 +26,9 @@ export class Base<C, T, J> {
     /*
      * gets the collection of documents for this table
      */
-    static async get() {
+    static async get(tableName?: string) {
         try {
-            return await getDocsFromServer(collection(db, this.table));
+            return await getDocsFromServer(collection(db, tableName || this.table));
         } catch (e) {
             throw Error(`Problem with getting docs from server, ${e.message}`);
         }
@@ -66,9 +66,8 @@ export class Base<C, T, J> {
     }
 
     static async getData<J>() {
-        let parsed: J = JSON.parse(fs.readFileSync(this.filePath, "utf-8") || JSON.stringify({}));
         try {
-            return this.get();
+            return this.get("raid-types");
         } catch (e) {
             throw Error(`Can't get data to be parsed in load operation.`);
         }
