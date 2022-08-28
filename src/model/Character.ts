@@ -22,13 +22,15 @@ export class Character extends Base<CharacterType, CharacterContent, CharacterJS
     classes: LostArkClasses = {};
 
     static async exists(name: string) {
+        let exists = false;
         const ref = query(collection(db, this.table), where("name", "==", name));
         const docs = await getDocs(ref);
         docs.forEach((character) => {
             if (character.data().name === name) {
-                return true;
+                exists = true;
+                return;
             }
         });
-        return false;
+        return exists;
     }
 }

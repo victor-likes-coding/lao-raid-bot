@@ -16,16 +16,15 @@ export class User {
     }
 
     static async getByDiscordId(id: string): Promise<DiscordDataUser> {
-        let doc = null;
+        let document = null;
         const usersRef = query(collection(db, this.table), where("discord_user", "==", id));
         const users = await getDocs(usersRef);
         users.forEach((doc) => {
             if (doc.data().discord_user === id) {
-                doc = doc;
+                document = doc;
             }
         });
-
-        return doc;
+        return document;
     }
 
     static async exists(doc: QueryDocumentSnapshot<DocumentData>, id: string) {
