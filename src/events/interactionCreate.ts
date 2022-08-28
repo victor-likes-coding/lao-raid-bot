@@ -15,16 +15,18 @@ export const event = {
                 const { id: userId } = selectMenuInteraction.user;
                 await Character.getByOwnerId(userId);
 
+                await selectMenuInteraction.update({ content: "you selected something", components: [] });
+            }
         }
 
         if (interaction.isChatInputCommand()) {
             if (!interaction.client.commands.has(interaction.commandName)) return;
 
             try {
-                return interaction.client.commands.get(interaction.commandName).execute(interaction);
+                return interaction.client.commands.get(interaction.commandName).execute(interaction, []);
             } catch (error) {
                 await interaction.reply({
-                    embeds: ["There was an issue with this command"],
+                    content: "There was an issue with this command",
                     ephemeral: true,
                 });
             }
