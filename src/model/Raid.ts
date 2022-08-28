@@ -99,7 +99,7 @@ type Item = {
     value: string;
 };
 
-type Menu = {
+export type Menu = {
     [key: string]: Item[];
 };
 
@@ -107,7 +107,6 @@ export class Raid extends Base<RaidType, RaidContent, RaidJSON> {
     // tag should be a discord tag
     static menus: Menu = {};
     static raidTypes: RaidJSON = {};
-    static engravings: Menu = {};
     static table = "raids";
     static filePath = path.join(__dirname, "..", "data", "raid.json");
 
