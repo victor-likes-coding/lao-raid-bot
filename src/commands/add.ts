@@ -47,7 +47,6 @@ export const command = {
             // handle checking if user exists
             if (!!document) {
                 user = document;
-                console.log("document exists!", user);
             } else {
                 // doesn't exist so it needs to be created
                 const newUser = await User.add({ characters: [], discord_user: id });
@@ -77,11 +76,9 @@ export const command = {
                 await User.addCharacter(user, newCharacter.id, user.id);
                 return await interaction.reply({ content: "New class added to your account", ephemeral: true });
             } catch (e) {
-                console.log(e);
                 return await interaction.reply({ content: "Something went adding a new character to your user account", ephemeral: true });
             }
         } catch (e) {
-            console.log(e);
             return await interaction.reply({ content: "Something went wrong getting users", ephemeral: true });
         }
     },
