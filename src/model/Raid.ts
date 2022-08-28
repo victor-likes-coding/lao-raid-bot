@@ -168,13 +168,13 @@ export class Raid extends Base<RaidType, RaidContent, RaidJSON> {
                             ...data,
                         });
                     }
-                } else {
-                    if (data.time > Date.now()) {
-                        raids.push({
-                            id: doc.id,
-                            ...doc.data(),
-                        });
-                    }
+                }
+            } else {
+                if (data.time > Date.now()) {
+                    raids.push({
+                        id: doc.id,
+                        ...doc.data(),
+                    });
                 }
             }
         });
