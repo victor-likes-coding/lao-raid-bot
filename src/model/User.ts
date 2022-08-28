@@ -40,4 +40,13 @@ export class User {
         }
         return doc;
     }
+
+    static async addCharacter(data: DocumentData, id: string, documentId: string) {
+        data.characters.push(id);
+        try {
+            await setDoc(doc(db, this.table, id), data);
+        } catch (e) {
+            Promise.reject("Could not save user data with new character added");
+        }
+    }
 }

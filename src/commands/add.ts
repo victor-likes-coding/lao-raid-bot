@@ -81,6 +81,7 @@ export const command = {
                 const newCharacterId = await addDoc(collection(db, "characters"), character);
                 user.characters.push(newCharacterId);
                 await setDoc(doc(db, "users", firebaseDoc.id), user);
+                await User.addCharacter(user, newCharacter.id, firebaseDoc.id);
                 return await interaction.reply({ content: "New class added to your account", ephemeral: true });
             } catch (e) {
                 return await interaction.reply({ content: "Something went adding a new character to your user account", ephemeral: true });
