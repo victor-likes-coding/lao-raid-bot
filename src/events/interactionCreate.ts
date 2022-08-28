@@ -7,6 +7,9 @@ export const event = {
             if (selectMenuInteraction.customId === "raid") {
                 // we now know which raid id
                 const [id] = selectMenuInteraction.values;
+
+                // now we need to get a list of the characters they own
+                const { id: userId } = selectMenuInteraction.user;
         }
 
         if (interaction.isChatInputCommand()) {
