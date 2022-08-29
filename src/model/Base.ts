@@ -1,5 +1,5 @@
 import fs from "fs";
-import { addDoc, collection, doc, getDoc, getDocsFromServer } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getDocsFromServer, setDoc } from "firebase/firestore";
 import path from "path";
 import { fileExists } from "../utils/file";
 import { db } from "../utils/client";
@@ -8,13 +8,17 @@ export type GenericType = {
     table: string;
 };
 
-export class Base<C, T, J> {
+type GenericModel = {
+    id: string;
+};
+
+export class Base<Content, Type, Json, Model> {
     static table = "";
     static filePath = "";
 
     // db functions below
 
-    static async add<C>(options: C, tableName?: string) {
+    static async add<Content>(options: Content, tableName?: string) {
         try {
             const doc = await addDoc(collection(db, tableName || this.table), options);
             return doc;
@@ -50,6 +54,15 @@ export class Base<C, T, J> {
         }
     }
 
+    static async update<Model extends GenericModel>(data: Model) {
+        const ref = doc(db, this.table, data.id);
+        try {
+            await setDoc(ref, data, { merge: true });
+        } catch (e) {
+            throw Error(`Updating document failed.`);
+        }
+    }
+
     // db fns end
 
     // creates a json file for the filepath if it doesn't exist
@@ -60,14 +73,14 @@ export class Base<C, T, J> {
         }
     }
 
-    static storeLocalData<C>(parsed: C) {
+    static storeLocalData<Content>(parsed: Content) {
         const data = JSON.stringify(parsed);
         fs.writeFileSync(this.filePath, data);
     }
 
-    static async getData<J>() {
+    static async getData(tableName?: string) {
         try {
-            return this.get("raid-types");
+            return this.get(tableName || this.table);
         } catch (e) {
             throw Error(`Can't get data to be parsed in load operation.`);
         }
