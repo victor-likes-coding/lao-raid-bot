@@ -34,14 +34,47 @@ export type ClassJSON = {
     };
 };
 
-export class Class extends Base<ClassContent, ClassType, ClassJSON> {
+export type ClassIdStructure = {
+    [id: string]: {
+        name?: string;
+        firstEngraving?: string;
+        secondEngraving?: string;
+        synergy?: string;
+        type?: "DPS" | "Support";
+    };
+};
+
+export type ClassModel = {
+    name: string;
+    id: string;
+    firstEngraving: string;
+    secondEngraving: string;
+    synergy: string;
+    type: "DPS" | "Support";
+};
+
+export class Class extends Base<ClassContent, ClassType, ClassJSON, ClassModel> {
     static table = "classes";
     static filePath = path.join(__dirname, "..", "data", "class.json");
-    static engravings: ClassJSON = {};
+    static classes: ClassJSON = {};
+    static classById: ClassIdStructure = {};
 
     static setup = async () => {
         await this.load();
     };
+
+    static convertClassData() {
+        this.classById = Object.keys(this.classes).reduce((prev, className) => {
+            const { id, ...rest } = this.classes[className];
+            return {
+                ...prev,
+                [id]: {
+                    ...rest,
+                    name: className,
+                },
+            };
+        }, {});
+    }
 
     static async parseData(docs: QuerySnapshot<DocumentData>) {
         // loads the local file
@@ -66,7 +99,8 @@ export class Class extends Base<ClassContent, ClassType, ClassJSON> {
         const docs = await this.getData();
         const parsed = await this.parseData(docs);
         this.storeLocalData(parsed);
-        this.engravings = parsed;
+        this.classes = parsed;
+        this.convertClassData();
     }
 
     static async getClass(data: string): Promise<string> {
