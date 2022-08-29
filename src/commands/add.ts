@@ -16,7 +16,7 @@ const data = new SlashCommandBuilder()
             .setDescription("Choose a class from list provided")
             .setRequired(true)
             .addChoices(
-                ...Object.keys(Class.engravings).map((className) => ({
+                ...Object.keys(Class.classes).map((className) => ({
                     name: className,
                     value: className,
                 }))
@@ -69,6 +69,7 @@ export const command = {
                 name: characterData.value as string,
                 ilvl: Number.parseInt(ilevelData.value as string),
                 user: user.id, // should be document id
+                raid: "", // houses the raid id
             };
 
             try {
