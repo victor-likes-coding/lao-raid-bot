@@ -38,6 +38,7 @@ export type RaidType = {
     time?: number;
     characters?: [];
     active?: boolean;
+    users?: [];
 };
 
 export type SpecificEngravings = {
@@ -101,10 +102,11 @@ export type RaidJSON = {
 };
 
 export type RaidModel = {
-    id?: string;
+    id: string;
     characters?: string[];
     time?: number;
     type?: string; // can be used to look up raid-type information
+    users?: string[];
 };
 
 type Item = {
@@ -116,12 +118,20 @@ export type Menu = {
     [key: string]: Item[];
 };
 
-export class Raid extends Base<RaidType, RaidContent, RaidJSON> {
+type RaidSelection = {
+    [user: string]: {
+        raid: string;
+        character?: string;
+    };
+};
+
+export class Raid extends Base<RaidType, RaidContent, RaidJSON, RaidModel> {
     // tag should be a discord tag
     static menus: Menu = {};
     static raidTypes: RaidJSON = {};
     static table = "raids";
     static filePath = path.join(__dirname, "..", "data", "raid.json");
+    static localSelectMenuSelections: RaidSelection = {};
 
     static generateMenu = (list: string[]): Item[] => {
         return list.reduce((prev, current, index: number) => {
@@ -139,17 +149,6 @@ export class Raid extends Base<RaidType, RaidContent, RaidJSON> {
         // raid menu
         this.menus["date"] = Raid.generateMenu(["Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "Monday", "Tuesday"]);
         this.menus["time"] = Raid.generateMenu(times);
-    };
-
-    static getById = async (id: string) => {
-        const raidRef = doc(db, "raids", id);
-        try {
-            return await getDoc(raidRef);
-        } catch (e) {
-            return new Promise((res) => {
-                res([]);
-            });
-        }
     };
 
     static async getByDate(date?: string) {
@@ -201,6 +200,7 @@ export class Raid extends Base<RaidType, RaidContent, RaidJSON> {
             type: raid,
             characters: [],
             active: true,
+            users: [],
         };
     };
 
@@ -224,7 +224,7 @@ export class Raid extends Base<RaidType, RaidContent, RaidJSON> {
                     if (raidDate === date) {
                         const dateInfo = moment(raidDoc.time).format("MM/DD dddd @ HH:mm ZZ");
                         dateStrings.push(
-                            `\`\`\`${index++}. ${raidDoc.type}\nWhen: ${dateInfo}\nSpace: ${raidDoc.characters.length} / ${
+                            `\`\`\`${index++}. ${raidDoc.type}\nWhen: ${dateInfo}\nMembers: ${raidDoc.characters.length} / ${
                                 Raid.raidTypes[raidDoc.type].memberLimit
                             }\`\`\`\n`
                         );
@@ -234,7 +234,7 @@ export class Raid extends Base<RaidType, RaidContent, RaidJSON> {
                 if (raidDoc.time > Date.now()) {
                     const dateInfo = moment(raidDoc.time).format("MM/DD dddd @ HH:mm ZZ");
                     dateStrings.push(
-                        `\`\`\`${index++}. ${raidDoc.type}\nWhen: ${dateInfo}\nSpace: ${raidDoc.characters.length} / ${
+                        `\`\`\`${index++}. ${raidDoc.type}\nWhen: ${dateInfo}\nMembers: ${raidDoc.characters.length} / ${
                             Raid.raidTypes[raidDoc.type].memberLimit
                         }\`\`\`\n`
                     );
@@ -268,7 +268,7 @@ export class Raid extends Base<RaidType, RaidContent, RaidJSON> {
 
     static async load() {
         this.createJSONFile();
-        const docs = await Raid.getData();
+        const docs = await Raid.getData("raid-types");
         const parsed = await this.parseData(docs);
         this.storeLocalData(parsed);
         this.raidTypes = parsed;
@@ -286,5 +286,15 @@ export class Raid extends Base<RaidType, RaidContent, RaidJSON> {
             new SelectMenuBuilder().setCustomId("raid").setPlaceholder("Choose a raid").setOptions(options)
         );
         return menu;
+    }
+
+    static isExpired(raid: RaidModel) {
+        // check and see if the current time Date.now() is > raid.time
+        return Date.now() > raid.time;
+    }
+
+    static userInRaid(users: string[], user: string) {
+        console.log(users);
+        return !!users.filter((u) => u === user).length;
     }
 }
